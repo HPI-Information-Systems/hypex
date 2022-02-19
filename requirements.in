@@ -1,0 +1,9 @@
+importlib-metadata # required for python_version<"3.8"
+
+# dev
+pyscaffold
+autopep8
+black
+pylint
+pytest
+tox
