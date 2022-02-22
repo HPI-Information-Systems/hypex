@@ -1,0 +1,11 @@
+importlib-metadata # required for python_version<"3.8"
+bayesian-optimization
+scipy==1.7.3
+
+# dev
+pyscaffold
+autopep8
+black
+pylint
+pytest
+tox

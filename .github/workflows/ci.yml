@@ -22,9 +22,12 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
+      env:
+        GITLAB_ACCESS_TOKEN: ${{ secrets.GITLAB_ACCESS_TOKEN }}
       run: |
         python -m pip install --upgrade pip
-        make setup
+        make setupCI
+        python -m pip install git+https://oauth2:${GITLAB_ACCESS_TOKEN}@gitlab.hpi.de/mats.poerschke/guten-tag.git
     - name: Lint
       run: make lint
     - name: Test

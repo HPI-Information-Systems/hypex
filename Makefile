@@ -9,7 +9,7 @@ setup:
 
 setupCI:
 	python3 -m venv ${VENV_NAME}
-	make install
+	${PYTHON} -m pip install -r requirements-ci.txt
 
 clean:
 	${PYTHON} -m pip freeze | xargs ${PYTHON} -m pip uninstall -y
@@ -31,6 +31,7 @@ install:
 
 deps:
 	${PYTHON} -m piptools compile requirements.in
+	${PYTHON} -m piptools compile requirements-ci.in -o requirements-ci.txt
 	make install
 
 docs:

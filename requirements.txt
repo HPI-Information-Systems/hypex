@@ -11,39 +11,107 @@ astroid==2.9.3
 attrs==21.4.0
     # via pytest
 autopep8==1.6.0
-    # via -r requirements.in
+    # via -r requirements-ci.in
+bayesian-optimization==1.2.0
+    # via -r requirements-ci.in
 black==22.1.0
-    # via -r requirements.in
+    # via -r requirements-ci.in
+bleach==4.1.0
+    # via readme-renderer
+certifi==2021.10.8
+    # via requests
+charset-normalizer==2.0.12
+    # via requests
 click==8.0.4
     # via black
+colorama==0.4.4
+    # via twine
 configupdater==3.0.1
     # via pyscaffold
+coverage[toml]==6.3.2
+    # via pytest-cov
+cycler==0.11.0
+    # via matplotlib
 distlib==0.3.4
     # via virtualenv
+docutils==0.18.1
+    # via readme-renderer
 filelock==3.6.0
     # via
     #   tox
     #   virtualenv
-importlib-metadata==4.11.1
+fonttools==4.29.1
+    # via matplotlib
+freezegun==1.1.0
+    # via gutentag
+gitdb==4.0.9
+    # via gitpython
+gitpython==3.1.27
+    # via gutentag
+gutentag @ git+https://gitlab.hpi.de/mats.poerschke/guten-tag.git
     # via -r requirements.in
+idna==3.3
+    # via requests
+importlib-metadata==4.11.1
+    # via
+    #   -r requirements-ci.in
+    #   keyring
+    #   twine
 iniconfig==1.1.1
     # via pytest
 isort==5.10.1
     # via pylint
+joblib==1.1.0
+    # via
+    #   gutentag
+    #   scikit-learn
+keyring==23.5.0
+    # via twine
+kiwisolver==1.3.2
+    # via matplotlib
 lazy-object-proxy==1.7.1
     # via astroid
+matplotlib==3.5.1
+    # via
+    #   gutentag
+    #   neurokit2
 mccabe==0.6.1
     # via pylint
+mypy==0.931
+    # via gutentag
 mypy-extensions==0.4.3
-    # via black
+    # via
+    #   black
+    #   mypy
+neurokit2==0.1.2
+    # via gutentag
+numpy==1.22.2
+    # via
+    #   bayesian-optimization
+    #   gutentag
+    #   matplotlib
+    #   neurokit2
+    #   pandas
+    #   scikit-learn
+    #   scipy
 packaging==21.3
     # via
+    #   bleach
+    #   matplotlib
     #   pyscaffold
     #   pytest
     #   setuptools-scm
     #   tox
+pandas==1.4.1
+    # via
+    #   gutentag
+    #   neurokit2
 pathspec==0.9.0
     # via black
+pillow==9.0.1
+    # via matplotlib
+pkginfo==1.8.2
+    # via twine
 platformdirs==2.5.1
     # via
     #   black
@@ -59,20 +127,65 @@ py==1.11.0
     #   tox
 pycodestyle==2.8.0
     # via autopep8
+pygments==2.11.2
+    # via readme-renderer
 pylint==2.12.2
-    # via -r requirements.in
+    # via -r requirements-ci.in
 pyparsing==3.0.7
-    # via packaging
+    # via
+    #   matplotlib
+    #   packaging
 pyscaffold==4.1.4
-    # via -r requirements.in
+    # via -r requirements-ci.in
 pytest==7.0.1
-    # via -r requirements.in
+    # via
+    #   -r requirements-ci.in
+    #   gutentag
+    #   pytest-cov
+pytest-cov==3.0.0
+    # via gutentag
+python-dateutil==2.8.2
+    # via
+    #   freezegun
+    #   matplotlib
+    #   pandas
+pytz==2021.3
+    # via pandas
+pyyaml==6.0
+    # via gutentag
+readme-renderer==32.0
+    # via twine
+requests==2.27.1
+    # via
+    #   requests-toolbelt
+    #   twine
+requests-toolbelt==0.9.1
+    # via twine
+rfc3986==2.0.0
+    # via twine
+scikit-learn==1.0.2
+    # via
+    #   bayesian-optimization
+    #   gutentag
+    #   neurokit2
+scipy==1.7.3
+    # via
+    #   -r requirements-ci.in
+    #   bayesian-optimization
+    #   neurokit2
+    #   scikit-learn
 setuptools-scm==6.4.2
     # via pyscaffold
 six==1.16.0
     # via
+    #   bleach
+    #   python-dateutil
     #   tox
     #   virtualenv
+smmap==5.0.0
+    # via gitdb
+threadpoolctl==3.1.0
+    # via scikit-learn
 toml==0.10.2
     # via
     #   autopep8
@@ -81,19 +194,34 @@ toml==0.10.2
 tomli==2.0.1
     # via
     #   black
+    #   coverage
+    #   mypy
     #   pytest
     #   setuptools-scm
 tomlkit==0.10.0
     # via pyscaffold
 tox==3.24.5
-    # via -r requirements.in
+    # via -r requirements-ci.in
+tqdm==4.62.3
+    # via
+    #   gutentag
+    #   twine
+twine==3.8.0
+    # via gutentag
 typing-extensions==4.1.1
     # via
     #   astroid
     #   black
+    #   mypy
     #   pylint
+urllib3==1.26.8
+    # via
+    #   requests
+    #   twine
 virtualenv==20.13.1
     # via tox
+webencodings==0.5.1
+    # via bleach
 wrapt==1.13.3
     # via astroid
 zipp==3.7.0
