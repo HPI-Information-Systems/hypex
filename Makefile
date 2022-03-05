@@ -12,15 +12,15 @@ setupCI:
 	${PYTHON} -m pip install -r requirements-ci.txt
 
 clean:
-	${PYTHON} -m pip freeze | xargs ${PYTHON} -m pip uninstall -y
-	make install
+	rm -r ${VENV_NAME}
+	make setup
 
 lint:
 	${PYTHON} -m pylint ${PACKAGE_DIR}
 
 format:
 	${PYTHON} -m isort --profile black ${PACKAGE_DIR}
-	${PYTHON} -m black ${PACKAGE_DIR}
+	${PYTHON} -m black -l 80 ${PACKAGE_DIR}
 
 test:
 	${PYTHON} -m pytest tests -vv

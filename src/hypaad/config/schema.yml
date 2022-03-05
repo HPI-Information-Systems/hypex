@@ -1,0 +1,31 @@
+type: object
+properties:
+  studies:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+        executable:
+          type: string
+        ntrials:
+          type: integer
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              dtype:
+                type: string
+              min:
+                type: number
+              min_exclusive:
+                type: boolean
+              max:
+                type: number
+
+
+

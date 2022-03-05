@@ -4,28 +4,45 @@
 #
 #    pip-compile requirements.in
 #
+alembic==1.7.6
+    # via optuna
 appdirs==1.4.4
     # via pyscaffold
 astroid==2.9.3
     # via pylint
 attrs==21.4.0
-    # via pytest
+    # via
+    #   cmd2
+    #   jsonschema
+    #   pytest
+autopage==0.5.0
+    # via cliff
 autopep8==1.6.0
     # via -r requirements-ci.in
-bayesian-optimization==1.2.0
+banpei==0.1.2
     # via -r requirements-ci.in
 black==22.1.0
     # via -r requirements-ci.in
 bleach==4.1.0
     # via readme-renderer
+bottle==0.12.19
+    # via optuna-dashboard
 certifi==2021.10.8
     # via requests
 charset-normalizer==2.0.12
     # via requests
 click==8.0.4
     # via black
+cliff==3.10.1
+    # via optuna
+cmaes==0.8.2
+    # via optuna
+cmd2==2.4.0
+    # via cliff
 colorama==0.4.4
     # via twine
+colorlog==6.6.0
+    # via optuna
 configupdater==3.0.1
     # via pyscaffold
 coverage[toml]==6.3.2
@@ -65,12 +82,18 @@ joblib==1.1.0
     # via
     #   gutentag
     #   scikit-learn
+jsonschema==4.4.0
+    # via -r requirements-ci.in
 keyring==23.5.0
     # via twine
 kiwisolver==1.3.2
     # via matplotlib
 lazy-object-proxy==1.7.1
     # via astroid
+mako==1.1.6
+    # via alembic
+markupsafe==2.1.0
+    # via mako
 matplotlib==3.5.1
     # via
     #   gutentag
@@ -87,27 +110,42 @@ neurokit2==0.1.2
     # via gutentag
 numpy==1.22.2
     # via
-    #   bayesian-optimization
+    #   banpei
+    #   cmaes
     #   gutentag
     #   matplotlib
     #   neurokit2
+    #   optuna
     #   pandas
     #   scikit-learn
     #   scipy
+optuna==2.10.0
+    # via
+    #   -r requirements-ci.in
+    #   optuna-dashboard
+optuna-dashboard==0.5.0
+    # via -r requirements-ci.in
 packaging==21.3
     # via
     #   bleach
     #   matplotlib
+    #   optuna
     #   pyscaffold
     #   pytest
     #   setuptools-scm
     #   tox
 pandas==1.4.1
     # via
+    #   -r requirements-ci.in
+    #   banpei
     #   gutentag
     #   neurokit2
 pathspec==0.9.0
     # via black
+pbr==5.8.1
+    # via
+    #   cliff
+    #   stevedore
 pillow==9.0.1
     # via matplotlib
 pkginfo==1.8.2
@@ -121,6 +159,8 @@ pluggy==1.0.0
     # via
     #   pytest
     #   tox
+prettytable==3.1.1
+    # via cliff
 py==1.11.0
     # via
     #   pytest
@@ -133,8 +173,13 @@ pylint==2.12.2
     # via -r requirements-ci.in
 pyparsing==3.0.7
     # via
+    #   cliff
     #   matplotlib
     #   packaging
+pyperclip==1.8.2
+    # via cmd2
+pyrsistent==0.18.1
+    # via jsonschema
 pyscaffold==4.1.4
     # via -r requirements-ci.in
 pytest==7.0.1
@@ -152,7 +197,11 @@ python-dateutil==2.8.2
 pytz==2021.3
     # via pandas
 pyyaml==6.0
-    # via gutentag
+    # via
+    #   -r requirements-ci.in
+    #   cliff
+    #   gutentag
+    #   optuna
 readme-renderer==32.0
     # via twine
 requests==2.27.1
@@ -165,14 +214,15 @@ rfc3986==2.0.0
     # via twine
 scikit-learn==1.0.2
     # via
-    #   bayesian-optimization
     #   gutentag
     #   neurokit2
+    #   optuna-dashboard
+    #   sklearn
 scipy==1.7.3
     # via
-    #   -r requirements-ci.in
-    #   bayesian-optimization
+    #   banpei
     #   neurokit2
+    #   optuna
     #   scikit-learn
 setuptools-scm==6.4.2
     # via pyscaffold
@@ -182,8 +232,16 @@ six==1.16.0
     #   python-dateutil
     #   tox
     #   virtualenv
+sklearn==0.0
+    # via -r requirements-ci.in
 smmap==5.0.0
     # via gitdb
+sqlalchemy==1.4.31
+    # via
+    #   alembic
+    #   optuna
+stevedore==3.5.0
+    # via cliff
 threadpoolctl==3.1.0
     # via scikit-learn
 toml==0.10.2
@@ -205,6 +263,7 @@ tox==3.24.5
 tqdm==4.62.3
     # via
     #   gutentag
+    #   optuna
     #   twine
 twine==3.8.0
     # via gutentag
@@ -220,6 +279,10 @@ urllib3==1.26.8
     #   twine
 virtualenv==20.13.1
     # via tox
+wcwidth==0.2.5
+    # via
+    #   cmd2
+    #   prettytable
 webencodings==0.5.1
     # via bleach
 wrapt==1.13.3

@@ -4,18 +4,35 @@
 #
 #    pip-compile --output-file=requirements-ci.txt requirements-ci.in
 #
+alembic==1.7.6
+    # via optuna
 astroid==2.9.3
     # via pylint
 attrs==21.4.0
-    # via pytest
+    # via
+    #   cmd2
+    #   jsonschema
+    #   pytest
+autopage==0.5.0
+    # via cliff
 autopep8==1.6.0
     # via -r requirements-ci.in
-bayesian-optimization==1.2.0
+banpei==0.1.2
     # via -r requirements-ci.in
 black==22.1.0
     # via -r requirements-ci.in
+bottle==0.12.19
+    # via optuna-dashboard
 click==8.0.4
     # via black
+cliff==3.10.1
+    # via optuna
+cmaes==0.8.2
+    # via optuna
+cmd2==2.4.0
+    # via cliff
+colorlog==6.6.0
+    # via optuna
 configupdater==3.0.1
     # via pyscaffold
 distlib==0.3.4
@@ -32,25 +49,49 @@ isort==5.10.1
     # via pylint
 joblib==1.1.0
     # via scikit-learn
+jsonschema==4.4.0
+    # via -r requirements-ci.in
 lazy-object-proxy==1.7.1
     # via astroid
+mako==1.1.6
+    # via alembic
+markupsafe==2.1.0
+    # via mako
 mccabe==0.6.1
     # via pylint
 mypy-extensions==0.4.3
     # via black
 numpy==1.22.2
     # via
-    #   bayesian-optimization
+    #   banpei
+    #   cmaes
+    #   optuna
+    #   pandas
     #   scikit-learn
     #   scipy
+optuna==2.10.0
+    # via
+    #   -r requirements-ci.in
+    #   optuna-dashboard
+optuna-dashboard==0.5.0
+    # via -r requirements-ci.in
 packaging==21.3
     # via
+    #   optuna
     #   pyscaffold
     #   pytest
     #   setuptools-scm
     #   tox
+pandas==1.4.1
+    # via
+    #   -r requirements-ci.in
+    #   banpei
 pathspec==0.9.0
     # via black
+pbr==5.8.1
+    # via
+    #   cliff
+    #   stevedore
 platformdirs==2.5.1
     # via
     #   black
@@ -61,6 +102,8 @@ pluggy==1.0.0
     # via
     #   pytest
     #   tox
+prettytable==3.1.1
+    # via cliff
 py==1.11.0
     # via
     #   pytest
@@ -70,24 +113,50 @@ pycodestyle==2.8.0
 pylint==2.12.2
     # via -r requirements-ci.in
 pyparsing==3.0.7
-    # via packaging
+    # via
+    #   cliff
+    #   packaging
+pyperclip==1.8.2
+    # via cmd2
+pyrsistent==0.18.1
+    # via jsonschema
 pyscaffold==4.1.5
     # via -r requirements-ci.in
 pytest==7.0.1
     # via -r requirements-ci.in
-scikit-learn==1.0.2
-    # via bayesian-optimization
-scipy==1.7.3
+python-dateutil==2.8.2
+    # via pandas
+pytz==2021.3
+    # via pandas
+pyyaml==6.0
     # via
     #   -r requirements-ci.in
-    #   bayesian-optimization
+    #   cliff
+    #   optuna
+scikit-learn==1.0.2
+    # via
+    #   optuna-dashboard
+    #   sklearn
+scipy==1.7.3
+    # via
+    #   banpei
+    #   optuna
     #   scikit-learn
 setuptools-scm==6.4.2
     # via pyscaffold
 six==1.16.0
     # via
+    #   python-dateutil
     #   tox
     #   virtualenv
+sklearn==0.0
+    # via -r requirements-ci.in
+sqlalchemy==1.4.31
+    # via
+    #   alembic
+    #   optuna
+stevedore==3.5.0
+    # via cliff
 threadpoolctl==3.1.0
     # via scikit-learn
 toml==0.10.2
@@ -104,6 +173,8 @@ tomlkit==0.10.0
     # via pyscaffold
 tox==3.24.5
     # via -r requirements-ci.in
+tqdm==4.63.0
+    # via optuna
 typing-extensions==4.1.1
     # via
     #   astroid
@@ -111,6 +182,10 @@ typing-extensions==4.1.1
     #   pylint
 virtualenv==20.13.1
     # via tox
+wcwidth==0.2.5
+    # via
+    #   cmd2
+    #   prettytable
 wrapt==1.13.3
     # via astroid
 zipp==3.7.0

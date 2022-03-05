@@ -1,6 +1,11 @@
 importlib-metadata # required for python_version<"3.8"
-bayesian-optimization
-scipy==1.7.3
+optuna
+optuna-dashboard
+pyyaml
+jsonschema
+sklearn
+pandas
+banpei
 
 # dev
 pyscaffold
