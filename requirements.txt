@@ -4,12 +4,12 @@
 #
 #    pip-compile requirements.in
 #
-alembic==1.7.6
+alembic==1.7.7
     # via optuna
-appdirs==1.4.4
-    # via pyscaffold
 astroid==2.9.3
     # via pylint
+asyncssh==2.9.0
+    # via timeeval
 attrs==21.4.0
     # via
     #   cmd2
@@ -19,8 +19,6 @@ autopage==0.5.0
     # via cliff
 autopep8==1.6.0
     # via -r requirements-ci.in
-banpei==0.1.2
-    # via -r requirements-ci.in
 black==22.1.0
     # via -r requirements-ci.in
 bleach==4.1.0
@@ -29,12 +27,20 @@ bottle==0.12.19
     # via optuna-dashboard
 certifi==2021.10.8
     # via requests
+cffi==1.15.0
+    # via cryptography
 charset-normalizer==2.0.12
     # via requests
 click==8.0.4
-    # via black
+    # via
+    #   black
+    #   distributed
 cliff==3.10.1
     # via optuna
+cloudpickle==2.0.0
+    # via
+    #   dask
+    #   distributed
 cmaes==0.8.2
     # via optuna
 cmd2==2.4.0
@@ -43,33 +49,54 @@ colorama==0.4.4
     # via twine
 colorlog==6.6.0
     # via optuna
-configupdater==3.0.1
+configupdater==3.1
     # via pyscaffold
 coverage[toml]==6.3.2
     # via pytest-cov
+cryptography==36.0.2
+    # via asyncssh
 cycler==0.11.0
     # via matplotlib
+dask[distributed]==2022.3.0
+    # via
+    #   -r requirements-ci.in
+    #   distributed
+    #   timeeval
+deprecated==1.2.13
+    # via redis
 distlib==0.3.4
     # via virtualenv
+distributed==2022.03.0
+    # via
+    #   -r requirements-ci.in
+    #   dask
+docker==5.0.3
+    # via timeeval
 docutils==0.18.1
     # via readme-renderer
+durations==0.3.3
+    # via timeeval
 filelock==3.6.0
     # via
     #   tox
     #   virtualenv
-fonttools==4.29.1
+fonttools==4.31.1
     # via matplotlib
-freezegun==1.1.0
+freezegun==1.2.1
     # via gutentag
+fsspec==2022.2.0
+    # via dask
 gitdb==4.0.9
     # via gitpython
 gitpython==3.1.27
     # via gutentag
-gutentag @ git+https://gitlab.hpi.de/mats.poerschke/guten-tag.git
+gutentag @ git+ssh://git@gitlab.hpi.de/mats.poerschke/guten-tag.git
     # via -r requirements.in
+heapdict==1.0.1
+    # via zict
 idna==3.3
     # via requests
-importlib-metadata==4.11.1
+importlib-metadata==4.11.3
     # via
     #   -r requirements-ci.in
     #   keyring
@@ -78,6 +105,10 @@ iniconfig==1.1.1
     # via pytest
 isort==5.10.1
     # via pylint
+jinja2==3.0.3
+    # via
+    #   distributed
+    #   timeeval
 joblib==1.1.0
     # via
     #   gutentag
@@ -87,20 +118,29 @@ jsonschema==4.4.0
 keyring==23.5.0
     # via twine
 kiwisolver==1.3.2
-    # via matplotlib
+    # via
+    #   -r requirements-ci.in
+    #   matplotlib
 lazy-object-proxy==1.7.1
     # via astroid
-mako==1.1.6
+locket==0.2.1
+    # via partd
+mako==1.2.0
     # via alembic
-markupsafe==2.1.0
-    # via mako
+markupsafe==2.1.1
+    # via
+    #   jinja2
+    #   mako
 matplotlib==3.5.1
     # via
     #   gutentag
     #   neurokit2
+    #   timeeval
 mccabe==0.6.1
     # via pylint
-mypy==0.931
+msgpack==1.0.3
+    # via distributed
+mypy==0.941
     # via gutentag
 mypy-extensions==0.4.3
     # via
@@ -108,17 +148,23 @@ mypy-extensions==0.4.3
     #   mypy
 neurokit2==0.1.2
     # via gutentag
-numpy==1.22.2
+numpy==1.22.3
     # via
-    #   banpei
     #   cmaes
     #   gutentag
     #   matplotlib
     #   neurokit2
+    #   numpyencoder
     #   optuna
     #   pandas
+    #   patsy
+    #   prts
     #   scikit-learn
     #   scipy
+    #   statsmodels
+    #   timeeval
+numpyencoder==0.3.0
+    # via timeeval
 optuna==2.10.0
     # via
     #   -r requirements-ci.in
@@ -128,20 +174,29 @@ optuna-dashboard==0.5.0
 packaging==21.3
     # via
     #   bleach
+    #   dask
+    #   distributed
     #   matplotlib
     #   optuna
     #   pyscaffold
     #   pytest
+    #   redis
     #   setuptools-scm
+    #   statsmodels
     #   tox
 pandas==1.4.1
     # via
     #   -r requirements-ci.in
-    #   banpei
     #   gutentag
     #   neurokit2
+    #   statsmodels
+    #   timeeval
+partd==1.2.0
+    # via dask
 pathspec==0.9.0
     # via black
+patsy==0.5.2
+    # via statsmodels
 pbr==5.8.1
     # via
     #   cliff
@@ -154,19 +209,28 @@ platformdirs==2.5.1
     # via
     #   black
     #   pylint
+    #   pyscaffold
     #   virtualenv
 pluggy==1.0.0
     # via
     #   pytest
     #   tox
-prettytable==3.1.1
+prettytable==3.2.0
     # via cliff
+prts==1.0.0.3
+    # via timeeval
+psutil==5.9.0
+    # via
+    #   distributed
+    #   timeeval
 py==1.11.0
     # via
     #   pytest
     #   tox
 pycodestyle==2.8.0
     # via autopep8
+pycparser==2.21
+    # via cffi
 pygments==2.11.2
     # via readme-renderer
 pylint==2.12.2
@@ -180,9 +244,9 @@ pyperclip==1.8.2
     # via cmd2
 pyrsistent==0.18.1
     # via jsonschema
-pyscaffold==4.1.4
+pyscaffold==4.2.1
     # via -r requirements-ci.in
-pytest==7.0.1
+pytest==7.1.1
     # via
     #   -r requirements-ci.in
     #   gutentag
@@ -194,18 +258,23 @@ python-dateutil==2.8.2
     #   freezegun
     #   matplotlib
     #   pandas
-pytz==2021.3
+pytz==2022.1
     # via pandas
 pyyaml==6.0
     # via
     #   -r requirements-ci.in
     #   cliff
+    #   dask
+    #   distributed
     #   gutentag
     #   optuna
-readme-renderer==32.0
+readme-renderer==34.0
     # via twine
+redis==4.1.4
+    # via -r requirements-ci.in
 requests==2.27.1
     # via
+    #   docker
     #   requests-toolbelt
     #   twine
 requests-toolbelt==0.9.1
@@ -217,33 +286,40 @@ scikit-learn==1.0.2
     #   gutentag
     #   neurokit2
     #   optuna-dashboard
-    #   sklearn
-scipy==1.7.3
+    #   timeeval
+scipy==1.8.0
     # via
-    #   banpei
     #   neurokit2
     #   optuna
     #   scikit-learn
+    #   statsmodels
 setuptools-scm==6.4.2
     # via pyscaffold
 six==1.16.0
     # via
     #   bleach
+    #   patsy
     #   python-dateutil
     #   tox
     #   virtualenv
-sklearn==0.0
-    # via -r requirements-ci.in
 smmap==5.0.0
     # via gitdb
-sqlalchemy==1.4.31
+sortedcontainers==2.4.0
+    # via distributed
+sqlalchemy==1.4.32
     # via
     #   alembic
     #   optuna
+statsmodels==0.13.2
+    # via timeeval
 stevedore==3.5.0
     # via cliff
+tblib==1.7.0
+    # via distributed
 threadpoolctl==3.1.0
     # via scikit-learn
+timeeval @ git+ssh://git@gitlab.hpi.de/mats.poerschke/timeeval.git@dev
+    # via -r requirements.in
 toml==0.10.2
     # via
     #   autopep8
@@ -258,26 +334,35 @@ tomli==2.0.1
     #   setuptools-scm
 tomlkit==0.10.0
     # via pyscaffold
+toolz==0.11.2
+    # via
+    #   dask
+    #   distributed
+    #   partd
+tornado==6.1
+    # via distributed
 tox==3.24.5
     # via -r requirements-ci.in
-tqdm==4.62.3
+tqdm==4.63.0
     # via
     #   gutentag
     #   optuna
+    #   timeeval
     #   twine
 twine==3.8.0
     # via gutentag
 typing-extensions==4.1.1
     # via
     #   astroid
+    #   asyncssh
     #   black
     #   mypy
     #   pylint
-urllib3==1.26.8
+urllib3==1.26.9
     # via
     #   requests
     #   twine
-virtualenv==20.13.1
+virtualenv==20.13.4
     # via tox
 wcwidth==0.2.5
     # via
@@ -285,8 +370,14 @@ wcwidth==0.2.5
     #   prettytable
 webencodings==0.5.1
     # via bleach
+websocket-client==1.3.1
+    # via docker
 wrapt==1.13.3
-    # via astroid
+    # via
+    #   astroid
+    #   deprecated
+zict==2.1.0
+    # via distributed
 zipp==3.7.0
     # via importlib-metadata
 

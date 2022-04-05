@@ -1,37 +1,36 @@
-import os
-from pathlib import Path
-
-from gutenTAG import GutenTAG
+import argparse
 
 import hypaad
 
 
-def generate_data(config_path: str, output_dir: str):
-    data_generator = GutenTAG.from_yaml(config_path, False, None)
-    data_generator.n_jobs = 1
-    data_generator.overview.add_seed(1)
-
-    data_generator.generate()
-    data_generator.save_timeseries(Path(output_dir))
-
-    output_files = {
-        "train_no_anomaly": "train_no_anomaly.csv",
-        "train_anomaly": "train_anomaly.csv",
-        "test": "test.csv",
-    }
-    return {
-        k: os.path.join(output_dir, file_name)
-        for k, file_name in output_files.items()
-    }
+def main(environment: str, config_path: str):
+    if environment != "local":
+        raise ValueError("Currently only local execution is supported")
+    hypaad.HypaadExecutor.execute(config_path)
 
 
-def main():
-    studies = hypaad.Config.load("config.yaml")
-
-    for study in studies:
-        optimizer = hypaad.Optimizer(study=study)
-        optimizer.run()
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="HYPAAD - Hyper Parameter Optimization in Time Series Anomaly Detection"
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=str,
+        default="config.yaml",
+        help="Path to configuration file",
+    )
+    parser.add_argument(
+        "-e",
+        "--environment",
+        type=str,
+        default="local",
+        choices=["local", "remote"],
+        help="Execution environment",
+    )
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    main(environment=args.environment, config_path=args.config)

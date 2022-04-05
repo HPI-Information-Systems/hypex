@@ -13,7 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        # Python 3.10 is currently not supported since statsmodels==0.12.* cannot be installed
+        python-version: ["3.8", "3.9"]
 
     steps:
     - uses: actions/checkout@v2
@@ -28,6 +29,7 @@ jobs:
         python -m pip install --upgrade pip
         make setupCI
         python -m pip install git+https://oauth2:${GITLAB_ACCESS_TOKEN}@gitlab.hpi.de/mats.poerschke/guten-tag.git
+        python -m pip install git+https://oauth2:${GITLAB_ACCESS_TOKEN}@gitlab.hpi.de/mats.poerschke/timeeval.git
     - name: Lint
       run: make lint
     - name: Test

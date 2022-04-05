@@ -8,6 +8,16 @@ Creates dev environment in `.venv` and installs all dependencies.
 make setup
 ```
 
+## Local Execution
+1. Start a local cluster using
+   ```
+   make cluster
+   ```
+2. Run the parameter optimization on the local cluster using
+   ```
+   make run
+   ```
+
 ## Update Dependencies
 
 1. Add dependency to `requirements.in`

@@ -1,11 +1,13 @@
 importlib-metadata # required for python_version<"3.8"
+jsonschema
+dask
+distributed
 optuna
 optuna-dashboard
-pyyaml
-jsonschema
-sklearn
 pandas
-banpei
+pyyaml
+redis
+kiwisolver==1.3.2 # Fixes observed issue with installing kiwisolver 1.4.0 and 1.4.1
 
 # dev
 pyscaffold
