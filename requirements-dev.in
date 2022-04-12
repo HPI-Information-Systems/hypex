@@ -1,4 +1,4 @@
--r requirements-base.in
+-r requirements.in
 
 # Dev dependencies
 pyscaffold

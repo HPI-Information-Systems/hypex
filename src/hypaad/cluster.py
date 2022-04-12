@@ -38,6 +38,7 @@ class ClusterInstance:
                 },
                 "scheduler_options": {"host": "node-0", "port": 8786},
             },
+            remote_python="python3",
         )
 
         # Setup Dask logging
@@ -127,12 +128,9 @@ class ClusterInstance:
         self.optuna_dashboard_container_id = asyncio.run(
             self.run_on_worker_ssh(
                 self.config.scheduler_host,
-                """
-                docker run --net host -d python:3.9 /bin/sh -c "
-                    pip install optuna-dashboard redis
-                    && optuna-dashboard redis://localhost:{REDIS_PORT} --host 0.0.0.0 --port 8080
-                "
-                """,
+                "docker run --net host -d python:3.9 /bin/sh -c \""
+                    "pip install optuna-dashboard redis"
+                    f"optuna-dashboard redis://localhost:{REDIS_PORT} --host 0.0.0.0 --port 8080\"",
             )
         )[1].stdout.strip()
         self._wait_until_up_and_running(
@@ -223,6 +221,9 @@ class Cluster:
             self.instance.set_up()
             return self.instance
         except Exception as e:
+            self.__exit__(*sys.exc_info())
+            raise e
+        except KeyboardInterrupt as e:
             self.__exit__(*sys.exc_info())
             raise e
 

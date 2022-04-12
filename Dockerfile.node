@@ -1,24 +1,29 @@
 FROM hypaad-base
 
-WORKDIR /usr/src/hypaad
-
 # Install ssh server
-RUN apk add openssh sudo
+RUN apt install -y openssh-server sudo
 
-# Create user 'admin'
-RUN adduser -h /home/ubuntu -s /bin/sh -G root -u 1000 -S admin
-RUN echo 'admin:secret' | chpasswd
-RUN echo "admin ALL=(ALL:ALL)ALL" >> /etc/sudoers.tmp
+# Install docker
+RUN apt install -y curl
+RUN curl -fsSL https://get.docker.com -o get-docker.sh \
+  && chmod +x get-docker.sh \
+  && ./get-docker.sh \
+  && rm get-docker.sh
 
-# Generate ssh keys
-RUN ssh-keygen -A
-
-EXPOSE 22
-ENV PATH=/usr/src/venv/bin:$PATH
-
+# Add sopedu to known hosts
 RUN mkdir -p /etc/docker && touch /etc/docker/daemon.json
 RUN echo { \"insecure-registries\": [\"sopedu:5000\"] } > /etc/docker/daemon.json
 
-# Start the ssh server and docker
-ENTRYPOINT [ "/bin/sh", "-c" ]
-CMD [ "/usr/sbin/sshd -D & dockerd-entrypoint.sh" ]
+# Add user 'admin'
+RUN useradd -ms /bin/bash admin -G root
+RUN echo 'admin:secret' | chpasswd
+RUN echo "admin ALL=(ALL:ALL)ALL" >> /etc/sudoers.tmp
+RUN gpasswd -a admin docker
+
+# Start ssh server
+RUN service ssh start
+
+EXPOSE 22
+
+ENTRYPOINT [ "/bin/bash", "-c" ]
+CMD [ "/usr/sbin/sshd -D & dockerd" ]

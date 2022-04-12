@@ -9,19 +9,20 @@ cluster:
 	docker-compose up --build
 
 run:
-	docker exec hypaad-controller-1 /bin/sh -c "ssh-keyscan node-0 >> ~/.ssh/known_hosts"
-	docker exec hypaad-controller-1 /bin/sh -c "ssh-keyscan node-1 >> ~/.ssh/known_hosts"
-	docker exec hypaad-controller-1 /bin/sh -c "/usr/src/venv/bin/python3 ${PACKAGE_DIR}"
+	make push-images
+	docker exec hypaad_controller /bin/sh -c "ssh-keyscan node-0 >> ~/.ssh/known_hosts"
+	docker exec hypaad_controller /bin/sh -c "ssh-keyscan node-1 >> ~/.ssh/known_hosts"
+	docker exec hypaad_controller /bin/sh -c "python3 ${PACKAGE_DIR}"
 
 logs:
 	docker compose logs -f
 
 run-it:
-	docker exec -it hypaad-controller-1 /bin/sh
+	docker exec -it hypaad_controller /bin/sh
 run-it0:
-	docker exec -it hypaad-node-0-1 /bin/sh
+	docker exec -it hypaad_node-0 /bin/sh
 run-it1:
-	docker exec -it hypaad-node-1-1 /bin/sh
+	docker exec -it hypaad_node-1 /bin/sh
 
 push-images:
 	docker image tag sopedu:5000/akita/series2graph localhost:5000/akita/series2graph
@@ -54,10 +55,12 @@ test:
 
 install:
 	${PYTHON} -m pip install pip-tools
-	${PYTHON} -m pip install -r requirements.txt
+	${PYTHON} -m pip install -r requirements-dev.txt
 
 deps:
 	${PYTHON} -m piptools compile requirements.in
+	${PYTHON} -m piptools compile requirements-base.in -o requirements-base.txt
+	${PYTHON} -m piptools compile requirements-dev.in -o requirements-dev.txt
 	${PYTHON} -m piptools compile requirements-ci.in -o requirements-ci.txt
 	make install
 
