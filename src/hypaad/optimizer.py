@@ -20,12 +20,11 @@ REMOTE_DATA_DIR = "data"
 class Optimizer:
     def __init__(
         self,
-        data_paths: t.Dict[str, t.Dict[str, Path]],
         registry: t.Optional["hypaad.Registry"] = None,
     ):
         self._logger = logging.getLogger(self.__class__.__name__)
-        self.data_paths = data_paths
         self.registry = registry
+        self.trial_results: t.List[hypaad.TrialResult] = []
 
         if self.registry is None:
             self._logger.info(
@@ -50,13 +49,20 @@ class Optimizer:
         return anomaly_scores
 
     def _create_objective(
-        self, study: "hypaad.Study"
+        self,
+        study: "hypaad.Study",
+        data_paths: t.Dict[str, t.Dict[str, Path]],
     ) -> t.Callable[[optuna.Trial], float]:
         if len(study.timeseries) != 1:
             raise Exception(
                 "Currently only a single timeseries per study is supported"
             )
-        test_dataset_path = self.data_paths[study.timeseries[0]]["unsupervised"]
+        if len(self.trial_results) > 0:
+            raise ValueError(
+                "There are already trial results available. "
+                "Please ensure to create a new Optimizer for each study."
+            )
+        test_dataset_path = data_paths[study.timeseries[0]]["unsupervised"]
 
         test_is_anomaly = pd.read_csv(test_dataset_path)["is_anomaly"]
 
@@ -76,7 +82,19 @@ class Optimizer:
             precision, recall, _ = metrics.precision_recall_curve(
                 y_true=test_is_anomaly, probas_pred=anomaly_scores
             )
-            return metrics.auc(recall, precision)
+            auc_score = metrics.auc(recall, precision)
+
+            # Store the trial's result
+            self.trial_results.append(
+                hypaad.TrialResult(
+                    id=trial.number,
+                    algorithm=study.algorithm,
+                    params=params,
+                    auc_score=auc_score,
+                )
+            )
+
+            return auc_score
 
         return func
 
@@ -86,6 +104,7 @@ class Optimizer:
         redis_url: str,
         n_trials: int,
         optuna_study_name: str,
+        data_paths: t.Dict[str, t.Dict[str, Path]],
     ):
         optuna_study = optuna.load_study(
             study_name=optuna_study_name,
@@ -96,7 +115,7 @@ class Optimizer:
             "Now running the optimization procedure for %d steps...", n_trials
         )
         optuna_study.optimize(
-            func=self._create_objective(study=study),
+            func=self._create_objective(study=study, data_paths=data_paths),
             n_trials=n_trials,
             catch=tuple([IndexError]),
         )

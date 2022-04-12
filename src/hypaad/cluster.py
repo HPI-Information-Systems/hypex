@@ -128,9 +128,9 @@ class ClusterInstance:
         self.optuna_dashboard_container_id = asyncio.run(
             self.run_on_worker_ssh(
                 self.config.scheduler_host,
-                "docker run --net host -d python:3.9 /bin/sh -c \""
-                    "pip install optuna-dashboard redis"
-                    f"optuna-dashboard redis://localhost:{REDIS_PORT} --host 0.0.0.0 --port 8080\"",
+                'docker run --net host -d python:3.9 /bin/sh -c "'
+                "pip install optuna-dashboard redis"
+                f'optuna-dashboard redis://localhost:{REDIS_PORT} --host 0.0.0.0 --port 8080"',
             )
         )[1].stdout.strip()
         self._wait_until_up_and_running(

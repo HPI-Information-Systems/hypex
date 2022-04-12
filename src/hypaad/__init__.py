@@ -9,6 +9,7 @@ from .config import *
 from .hypaad_executor import *
 from .optimizer import *
 from .registry import *
+from .trial_result import *
 
 try:
     # Change here if project is renamed and does not equal the package name
@@ -29,4 +30,5 @@ __all__ = (
     + hypaad_executor.__all__
     + optimizer.__all__
     + registry.__all__
+    + trial_result.__all__
 )

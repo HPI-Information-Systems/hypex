@@ -71,23 +71,46 @@ class HypaadExecutor:
         optuna_study_name: t.List[str],
         redis_url: str,
         n_trials_per_executor: np.array,
-    ):
+    ) -> t.List["hypaad.TrialResult"]:
+        """Long running worker task running the hyper-parameter optimization.
+
+        Args:
+            executor_id (t.List[int]): Identifies the worker this task is executed on.
+            data_paths (t.Dict[str, t.Dict[str, t.Dict[str, Path]]]): The paths
+                the worker with the given ``executor_id`` stored the generated data at.
+            study (hypaad.Study): The study definition.
+            optuna_study_name (t.List[str]): Name of the Optuna study.
+            redis_url (str): URL of the started Redis instance used to share trial results.
+            n_trials_per_executor (np.array): The number of trials to run before completing this worker task.
+
+        Raises:
+            ValueError: Did not expect more than one executor_id
+
+        Returns:
+            t.List[t.Any]:
+        """
         if len(executor_id) != 1:
             raise ValueError(
                 f"Did not expect more than one executor_id, got {executor_id}"
             )
         worker_address = dask.distributed.get_worker().address
-        optimizer = hypaad.Optimizer(data_paths=data_paths[worker_address][0])
+        optimizer = hypaad.Optimizer()
         optimizer.run(
             study=study,
             redis_url=redis_url,
             n_trials=n_trials_per_executor[executor_id[0]],
             optuna_study_name=optuna_study_name[0],
+            data_paths=data_paths[worker_address][0],
         )
-        return [f"study result of {study.name}"]
+        return optimizer.trial_results
 
     @classmethod
     def execute(cls, config_path: str):
+        """Builds a dask task graph and executes it on a Dask SSHCluster.
+
+        Args:
+            config_path (str): Path to the local configuration file
+        """
         raw_config = hypaad.Config.read_yml(config_path)
         studies = hypaad.Config.from_dict(config=raw_config)
 
@@ -124,9 +147,10 @@ class HypaadExecutor:
                     optuna_study_name=optuna_study_name,
                 )
 
-            result = study_runs
+            # Each worker tracks its trial runs and returns the results
+            trial_results = study_runs
 
             cls._logger.info(
                 "Now submitting the task graph to the cluster. The computation will take some time..."
             )
-            print("result: ", result.compute())
+            print("result: ", trial_results.compute())
