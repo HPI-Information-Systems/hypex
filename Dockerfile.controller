@@ -1,0 +1,11 @@
+# syntax = edrevo/dockerfile-plus
+
+INCLUDE+ Dockerfile.base
+
+COPY setup.* .
+COPY .git .git
+RUN mkdir -p src/hypaad
+COPY src/hypaad/__init__.py src/hypaad/__init__.py
+RUN python3 setup.py develop
+
+CMD [ "/bin/bash" ]

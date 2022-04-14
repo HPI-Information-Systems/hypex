@@ -1,4 +1,6 @@
-FROM hypaad-base
+# syntax = edrevo/dockerfile-plus
+
+INCLUDE+ Dockerfile.base
 
 # Install ssh server
 RUN apt install -y openssh-server sudo

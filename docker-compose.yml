@@ -2,7 +2,7 @@ version: '3.5'
 services:
   controller:
     container_name: hypaad_controller
-    image: hypaad-base
+    image: hypaad-controller
     tty: true
     volumes:
       - .:/usr/src/hypaad
@@ -20,8 +20,6 @@ services:
       - 6379:6379 # Redis
       - 8787:8787 # Dask Dashboard
       - 8080:8080 # Optuna Dashboard
-    volumes:
-      - .:/usr/src/hypaad:ro
 
   node-1:
     container_name: hypaad_node-1
@@ -29,5 +27,3 @@ services:
     image: hypaad-node
     ports:
       - 34443:34443
-    volumes:
-      - .:/usr/src/hypaad:ro

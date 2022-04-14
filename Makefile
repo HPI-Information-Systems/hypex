@@ -4,7 +4,7 @@ PACKAGE_DIR=src/hypaad
 
 cluster:
 	docker compose down -v --remove-orphans
-	docker build --ssh default . -t hypaad-base -f Dockerfile.main
+	docker build --ssh default . -t hypaad-controller -f Dockerfile.controller
 	docker build --ssh default . -t hypaad-node -f Dockerfile.node
 	docker-compose up --build
 
@@ -68,8 +68,8 @@ docs:
 	${PYTHON} -m tox -e docs
 
 package:
-	rm dist/*
-	${PYTHON} setup.py sdist
+	rm -f dist/*
+	${PYTHON} setup.py sdist bdist_egg
 
 # make release version=0.1.0
 release:
