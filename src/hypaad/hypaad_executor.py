@@ -5,7 +5,6 @@ from pathlib import Path
 import dask
 import dask.bag
 import dask.distributed
-import numpy as np
 import optuna
 from gutenTAG import GutenTAG
 
@@ -63,25 +62,23 @@ class HypaadExecutor:
         return [optuna_study.study_name]
 
     @classmethod
-    def _run_study(
+    def _run_study_trial(
         cls,
-        executor_id: t.List[int],
+        trial_id: t.List[int],
         data_paths: t.Dict[str, t.Dict[str, t.Dict[str, Path]]],
         study: "hypaad.Study",
         optuna_study_name: t.List[str],
         redis_url: str,
-        n_trials_per_executor: np.array,
     ) -> t.List["hypaad.TrialResult"]:
-        """Long running worker task running the hyper-parameter optimization.
+        """Executes a single study trail in the hyper-parameter optimization process.
 
         Args:
-            executor_id (t.List[int]): Identifies the worker this task is executed on.
+            trial_id: The trial ID.
             data_paths (t.Dict[str, t.Dict[str, t.Dict[str, Path]]]): The paths
                 the worker with the given ``executor_id`` stored the generated data at.
             study (hypaad.Study): The study definition.
             optuna_study_name (t.List[str]): Name of the Optuna study.
             redis_url (str): URL of the started Redis instance used to share trial results.
-            n_trials_per_executor (np.array): The number of trials to run before completing this worker task.
 
         Raises:
             ValueError: Did not expect more than one executor_id
@@ -89,16 +86,16 @@ class HypaadExecutor:
         Returns:
             t.List[t.Any]:
         """
-        if len(executor_id) != 1:
+        if len(trial_id) != 1:
             raise ValueError(
-                f"Did not expect more than one executor_id, got {executor_id}"
+                f"Did not expect more than one trial_id, got {trial_id}"
             )
         worker_address = dask.distributed.get_worker().address
         optimizer = hypaad.Optimizer()
         optimizer.run(
             study=study,
             redis_url=redis_url,
-            n_trials=n_trials_per_executor[executor_id[0]],
+            n_trials=1,
             optuna_study_name=optuna_study_name[0],
             data_paths=data_paths[worker_address][0],
         )
@@ -115,42 +112,28 @@ class HypaadExecutor:
         studies = hypaad.Config.from_dict(config=raw_config)
 
         with hypaad.Cluster() as cluster:
-            num_workers = cluster.get_num_workers()
-
             data_paths = cluster.client.run(
                 cls._generate_data, ts_config=raw_config
             )
 
-            executor_id = dask.bag.from_sequence(
-                range(num_workers), npartitions=num_workers
-            )
-
-            study_runs = executor_id
+            results = {}
             for study in studies:
                 redis_url = cluster.get_redis_uri()
-
-                n_trials_per_executor = list(
-                    map(
-                        len,
-                        np.array_split(range(study.ntrials), num_workers),
-                    )
-                )
                 optuna_study_name = cls._create_study(
                     study=study, redis_url=redis_url
                 )
-                study_runs = study_runs.map_partitions(
-                    cls._run_study,
+
+                results[study.name] = dask.bag.from_sequence(
+                    range(study.ntrials), npartitions=study.ntrials
+                ).map_partitions(
+                    cls._run_study_trial,
                     data_paths=data_paths,
                     study=study,
                     redis_url=redis_url,
-                    n_trials_per_executor=n_trials_per_executor,
                     optuna_study_name=optuna_study_name,
                 )
-
-            # Each worker tracks its trial runs and returns the results
-            trial_results = study_runs
 
             cls._logger.info(
                 "Now submitting the task graph to the cluster. The computation will take some time..."
             )
-            print("result: ", trial_results.compute())
+            print("result: ", dask.compute(results))

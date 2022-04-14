@@ -9,6 +9,7 @@ cluster:
 	docker-compose up --build
 
 run:
+	make package
 	make push-images
 	docker exec hypaad_controller /bin/sh -c "ssh-keyscan node-0 >> ~/.ssh/known_hosts"
 	docker exec hypaad_controller /bin/sh -c "ssh-keyscan node-1 >> ~/.ssh/known_hosts"
