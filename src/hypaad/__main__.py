@@ -1,12 +1,20 @@
 import argparse
 
 import hypaad
+from hypaad.cluster_config import ClusterConfig
 
 
 def main(environment: str, config_path: str):
-    if environment != "local":
-        raise ValueError("Currently only local execution is supported")
-    hypaad.HypaadExecutor.execute(config_path)
+    cluster_config: ClusterConfig = None
+    if environment == "local":
+        cluster_config = hypaad.LOCAL_CLUSTER_CONFIG
+    elif environment == "remote":
+        cluster_config = hypaad.REMOTE_CLUSTER_CONFIG
+    else:
+        raise ValueError(f"Unknown environment: {environment}")
+    hypaad.HypaadExecutor.execute(
+        cluster_config=cluster_config, config_path=config_path
+    )
 
 
 def parse_args():

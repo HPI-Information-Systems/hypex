@@ -1,5 +1,6 @@
 import json
 import logging
+import subprocess
 import typing as t
 from pathlib import Path
 
@@ -31,6 +32,15 @@ class AlgorithmExecutor:
     def _get_results_path(cls, args: t.Dict[str, t.Any]) -> Path:
         return Path(args.get("results_path", "./results"))
 
+    @staticmethod
+    def _get_uid() -> str:
+        uid = subprocess.run(
+            ["id", "-u"], capture_output=True, text=True, check=False
+        ).stdout.strip()
+        if uid == "0":  # if uid is root (0), we don't want to change it
+            return ""
+        return uid
+
     def _start_container(self, dataset_path: str, args: t.Dict[str, t.Any]):
         client = docker.from_env()
         _dataset_path = Path(dataset_path)
@@ -52,6 +62,8 @@ class AlgorithmExecutor:
             "customParameters": args.get("hyper_params", {}),
         }
 
+        uid = AlgorithmExecutor._get_uid()
+
         return client.containers.run(
             image=self.image_name,
             command=f"execute-algorithm '{json.dumps(algorithm_args)}'",
@@ -65,6 +77,7 @@ class AlgorithmExecutor:
                     "mode": "rw",
                 },
             },
+            environment={"LOCAL_UID": uid},
             detach=True,
         )
 

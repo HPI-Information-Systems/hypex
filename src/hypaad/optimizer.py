@@ -117,5 +117,4 @@ class Optimizer:
         optuna_study.optimize(
             func=self._create_objective(study=study, data_paths=data_paths),
             n_trials=n_trials,
-            catch=tuple([IndexError]),
         )

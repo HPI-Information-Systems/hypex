@@ -5,6 +5,7 @@ from hypaad.log import setup_logging  # pragma: no cover
 
 from .algorithms import *
 from .cluster import *
+from .cluster_config import *
 from .config import *
 from .hypaad_executor import *
 from .optimizer import *
@@ -27,6 +28,7 @@ __all__ = (
     algorithms.__all__
     + config.__all__
     + cluster.__all__
+    + cluster_config.__all__
     + hypaad_executor.__all__
     + optimizer.__all__
     + registry.__all__

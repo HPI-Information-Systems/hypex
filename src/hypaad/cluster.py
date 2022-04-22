@@ -11,13 +11,13 @@ from types import TracebackType
 import asyncssh
 import dask
 import dask.distributed
-import timeeval
 from dask import config as dask_config
 from redis import Redis
 
-__all__ = ["Cluster", "ClusterInstance"]
+# pylint: disable=cyclic-import,unused-import
+import hypaad
 
-REDIS_PORT = 6379
+__all__ = ["Cluster", "ClusterInstance"]
 
 
 class ClusterInstance:
@@ -26,27 +26,15 @@ class ClusterInstance:
     redis_container_id: t.Optional[str] = None
     optuna_dashboard_container_id: t.Optional[str] = None
 
-    def __init__(self) -> None:
+    def __init__(self, config: "hypaad.ClusterConfig") -> None:
         self._logger = logging.getLogger(self.__class__.__name__)
-        self.config = timeeval.RemoteConfiguration(
-            scheduler_host="node-0",
-            worker_hosts=["node-0", "node-1"],
-            kwargs_overwrites={
-                "connect_options": {
-                    "port": 22,
-                    "username": "admin",
-                    "password": "secret",
-                },
-                "scheduler_options": {"host": "node-0", "port": 8786},
-            },
-            remote_python="python3",
-        )
+        self.config = config
 
         # Setup Dask logging
         self._logger.info("Configuring dask logging")
         dask_config.config["distributed"][
             "logging"
-        ] = self.config.get_remote_logging_config()
+        ] = self.config.dask_logging_config()
 
     def get_client(self) -> dask.distributed.Client:
         return self.client
@@ -78,7 +66,7 @@ class ClusterInstance:
             t.Tuple[bool, asyncssh.SSHCompletedProcess]: _description_
         """
         async with asyncssh.connect(
-            worker, **self.config.kwargs_overwrites.get("connect_options")
+            worker, **self.config.connect_options
         ) as conn:
             result = await conn.run(command, timeout=timeout, check=True)
             if result.returncode == 0:
@@ -112,14 +100,12 @@ class ClusterInstance:
         return results
 
     def get_redis_uri(self) -> str:
-        return f"redis://{self.config.scheduler_host}:{REDIS_PORT}"
+        return f"redis://{self.config.scheduler_host}:{self.config.redis_port}"
 
     def set_up(self):
         self._logger.info("Creating dask ssh cluster...")
         self.cluster = dask.distributed.SSHCluster(
-            **self.config.to_ssh_cluster_kwargs(
-                limits=timeeval.ResourceConstraints()
-            )
+            **self.config.dask_ssh_cluster_config()
         )
         self.client = dask.distributed.Client(self.cluster.scheduler_address)
         self._logger.info("Successfully connected to the dask cluster")
@@ -164,14 +150,16 @@ class ClusterInstance:
                 worker=self.config.scheduler_host,
                 command='docker run --net host -d python:3.9 /bin/sh -c "'
                 "pip install optuna-dashboard redis "
-                f'&& optuna-dashboard redis://localhost:{REDIS_PORT} --host 0.0.0.0 --port 8080"',
+                f"&& optuna-dashboard redis://localhost:{self.config.redis_port} "
+                f'--host 0.0.0.0 --port {self.config.optuna_dashboard_port}"',
                 timeout=60,
             )
         )[1].stdout.strip()
         self._wait_until_up_and_running(
             name="Optuna Dashboard",
             ping_func=lambda: self._assert_host_port_reachable(
-                host=self.config.scheduler_host, port=8080
+                host=self.config.scheduler_host,
+                port=self.config.optuna_dashboard_port,
             ),
             timeout=60,
         )
@@ -276,9 +264,12 @@ class ClusterInstance:
 class Cluster:
     instance: t.Optional[ClusterInstance] = None
 
+    def __init__(self, config: "hypaad.ClusterConfig"):
+        self.config = config
+
     def __enter__(self):
         try:
-            self.instance = ClusterInstance()
+            self.instance = ClusterInstance(config=self.config)
             self.instance.set_up()
             return self.instance
         except Exception as e:

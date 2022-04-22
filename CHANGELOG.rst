@@ -8,3 +8,4 @@ Unreleased
 - Local dev setup using SSHCluster and docker compose (PR #9)
 - Automatically upload local code changes (Issue #7)
 - Use one dask task per study trail (Issue #13)
+- Support remote cluster execution (Issue #6)

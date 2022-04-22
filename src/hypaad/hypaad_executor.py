@@ -6,6 +6,7 @@ import dask
 import dask.bag
 import dask.distributed
 import optuna
+import pandas as pd
 from gutenTAG import GutenTAG
 
 # pylint: disable=cyclic-import
@@ -102,7 +103,7 @@ class HypaadExecutor:
         return optimizer.trial_results
 
     @classmethod
-    def execute(cls, config_path: str):
+    def execute(cls, cluster_config: hypaad.ClusterConfig, config_path: str):
         """Builds a dask task graph and executes it on a Dask SSHCluster.
 
         Args:
@@ -111,7 +112,7 @@ class HypaadExecutor:
         raw_config = hypaad.Config.read_yml(config_path)
         studies = hypaad.Config.from_dict(config=raw_config)
 
-        with hypaad.Cluster() as cluster:
+        with hypaad.Cluster(cluster_config) as cluster:
             data_paths = cluster.client.run(
                 cls._generate_data, ts_config=raw_config
             )
@@ -136,4 +137,17 @@ class HypaadExecutor:
             cls._logger.info(
                 "Now submitting the task graph to the cluster. The computation will take some time..."
             )
-            print("result: ", dask.compute(results))
+            computed_results: t.List[
+                t.Tuple[str, t.List["hypaad.TrialResult"]]
+            ] = dask.compute(results)[0].items()
+            for study_name, entries in computed_results:
+                output_path = Path("results") / f"{study_name}.csv"
+                cls._logger.info(
+                    "Saving results of study %s to %s", study_name, output_path
+                )
+
+                pd.DataFrame.from_dict(
+                    data=[e.to_dict() for e in entries],
+                    orient="columns",
+                ).to_csv(output_path, index=False)
+            cls._logger.info("Completed saving study results to local disk.")
