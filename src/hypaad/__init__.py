@@ -11,6 +11,7 @@ from .hypaad_executor import *
 from .optimizer import *
 from .registry import *
 from .trial_result import *
+from .utils import *
 
 try:
     # Change here if project is renamed and does not equal the package name
@@ -33,4 +34,5 @@ __all__ = (
     + optimizer.__all__
     + registry.__all__
     + trial_result.__all__
+    + utils.__all__
 )

@@ -8,9 +8,7 @@ pandas
 pyyaml
 redis
 kiwisolver==1.3.2 # Fixes observed issue with installing kiwisolver 1.4.0 and 1.4.1
-
-# Fixed dependencies due tue Alpine Linux
-psutil==5.8.0
+parallel-ssh # For remote cluster setup
 
 # Dask Dashboard
 bokeh

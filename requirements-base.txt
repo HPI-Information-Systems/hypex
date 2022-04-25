@@ -75,6 +75,10 @@ frozenlist==1.3.0
     #   aiosignal
 fsspec==2022.3.0
     # via dask
+gevent==21.12.0
+    # via parallel-ssh
+greenlet==1.1.2
+    # via gevent
 heapdict==1.0.1
     # via zict
 idna==3.3
@@ -171,6 +175,8 @@ pandas==1.4.2
     # via -r requirements-base.in
 pandocfilters==1.5.0
     # via nbconvert
+parallel-ssh==2.10.0
+    # via -r requirements-base.in
 partd==1.2.0
     # via dask
 pbr==5.8.1
@@ -184,9 +190,7 @@ prettytable==3.2.0
 prometheus-client==0.14.1
     # via jupyter-server
 psutil==5.8.0
-    # via
-    #   -r requirements-base.in
-    #   distributed
+    # via distributed
 ptyprocess==0.7.0
     # via terminado
 pycparser==2.21
@@ -245,6 +249,10 @@ sqlalchemy==1.4.35
     # via
     #   alembic
     #   optuna
+ssh-python==0.10.0
+    # via parallel-ssh
+ssh2-python==0.27.0
+    # via parallel-ssh
 stevedore==3.5.0
     # via cliff
 tblib==1.7.0
@@ -299,3 +307,10 @@ zict==2.1.0
     # via distributed
 zipp==3.8.0
     # via importlib-metadata
+zope-event==4.5.0
+    # via gevent
+zope-interface==5.4.0
+    # via gevent
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

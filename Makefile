@@ -15,6 +15,10 @@ run:
 	docker exec hypaad_controller /bin/sh -c "ssh-keyscan node-1 >> ~/.ssh/known_hosts"
 	docker exec hypaad_controller /bin/sh -c "python3 ${PACKAGE_DIR}"
 
+run-remote:
+	make package
+	${PYTHON} ${PACKAGE_DIR} --environment remote
+
 logs:
 	docker compose logs -f
 

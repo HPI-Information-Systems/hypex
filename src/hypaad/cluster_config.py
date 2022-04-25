@@ -84,5 +84,5 @@ LOCAL_CLUSTER_CONFIG = ClusterConfig(
 REMOTE_CLUSTER_CONFIG = ClusterConfig(
     scheduler_host="odin01",
     worker_hosts=[f"odin{i:02d}" for i in range(1, 15)],
-    remote_python="python3",
+    remote_python="~/hypaad/.venv/bin/python",
 )
