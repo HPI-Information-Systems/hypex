@@ -138,7 +138,7 @@ class Optimizer:
                 )
             )
 
-            return roc_auc_score
+            return auc_pr_score
 
         return func
 
