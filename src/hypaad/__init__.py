@@ -7,6 +7,7 @@ from .algorithms import *
 from .cluster import *
 from .cluster_config import *
 from .config import *
+from .early_stopping import *
 from .hypaad_executor import *
 from .optimizer import *
 from .registry import *
@@ -27,6 +28,7 @@ setup_logging(logging.INFO)
 # pylint: disable=undefined-variable
 __all__ = (
     algorithms.__all__
+    + early_stopping.__all__
     + config.__all__
     + cluster.__all__
     + cluster_config.__all__

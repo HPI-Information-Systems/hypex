@@ -6,6 +6,7 @@ import numpy as np
 import optuna
 import pandas as pd
 import timeeval
+from dask.distributed import get_worker
 from sklearn import metrics
 
 # pylint: disable=cyclic-import
@@ -79,22 +80,65 @@ class Optimizer:
                 dataset_path=test_dataset_path,
                 params=params,
             )
-            precision, recall, _ = metrics.precision_recall_curve(
+            self._logger.info("Writing anomaly scores to disk...")
+            score_path = (
+                Path("trial_results")
+                / f"{study.name}__trial-{trial.number}__scores.csv"
+            )
+            pd.DataFrame({"anomaly_scores": anomaly_scores}).to_csv(
+                score_path, index=False
+            )
+            self._logger.info(
+                "Successfully written anomaly scores to %s", score_path
+            )
+
+            # Calculate AUC_PR
+            precision, recall, thresholds = metrics.precision_recall_curve(
                 y_true=test_is_anomaly, probas_pred=anomaly_scores
             )
-            auc_score = metrics.auc(recall, precision)
+            auc_pr_score = metrics.auc(recall, precision)
+
+            f1_scores = (2 * precision * recall) / (precision + recall)
+
+            # Caluclate ROC
+            roc_auc_score = metrics.roc_auc_score(
+                y_true=test_is_anomaly, y_score=anomaly_scores
+            )
+            # fpr, tpr, thresholds = metrics.roc_curve(
+            #     y_true=test_is_anomaly, y_score=anomaly_scores
+            # )
+
+            # # Caluclate the best threshold (based on tpr fpr)
+            # idx = np.argmax(tpr - fpr)
+            # best_threshold = thresholds[idx]
+
+            # Caluclate the best threshold (based on f1 score)
+            idx = np.argmax(f1_scores)
+            best_threshold = thresholds[idx]
+
+            y_pred = anomaly_scores >= best_threshold
+            accuracy_score = metrics.accuracy_score(
+                y_true=test_is_anomaly, y_pred=y_pred
+            )
+            f1_score = metrics.f1_score(y_true=test_is_anomaly, y_pred=y_pred)
 
             # Store the trial's result
             self.trial_results.append(
                 hypaad.TrialResult(
                     id=trial.number,
+                    worker=get_worker().name,
                     algorithm=study.algorithm,
                     params=params,
-                    auc_score=auc_score,
+                    auc_pr_score=auc_pr_score,
+                    roc_auc_score=roc_auc_score,
+                    best_threshold=best_threshold,
+                    f1_score=f1_score,
+                    accuracy_score=accuracy_score,
+                    anomaly_scores_path=score_path,
                 )
             )
 
-            return auc_score
+            return roc_auc_score
 
         return func
 
@@ -116,5 +160,6 @@ class Optimizer:
         )
         optuna_study.optimize(
             func=self._create_objective(study=study, data_paths=data_paths),
+            callbacks=[hypaad.EarlyStoppingCallback],
             n_trials=n_trials,
         )

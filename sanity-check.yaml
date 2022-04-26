@@ -1,0 +1,93 @@
+base:
+  - &base-ts
+    length: 10000
+    channels: 1
+    semi-supervised: true
+    supervised: true
+  - &base-osci
+    frequency: 5.0
+    amplitude: 1.0
+    variance: 0.05
+
+ecg:
+  - &ecg-0
+    <<: *base-osci
+    kind: "ecg"
+
+
+anomaly_kinds:
+  - &global-extremum
+    length: 1
+    kinds:
+      - kind: "extremum"
+        parameters:
+          min: false
+          local: false
+  - &frequency
+    length: 100
+    kinds:
+      - kind: "frequency"
+        parameters:
+          frequency_factor: 2.0
+  - &pattern
+    length: 100
+    kinds:
+      - kind: "pattern"
+        parameters:
+          sinusoid_k: 10.0
+          cbf_pattern_factor: 2
+  - &pattern-shift
+    length: 100
+    kinds:
+      - kind: "pattern-shift"
+        parameters:
+          shift_by: 10
+          transition_window: 10
+  - &variance-large
+    length: 100
+    kinds:
+      - kind: "variance"
+        parameters:
+          variance: 0.3
+
+timeseries:
+  - name: ecg-diff-count-5
+    <<: *base-ts
+    base-oscillation:
+      *ecg-0
+    anomalies:
+      - position: beginning
+        <<: *pattern-shift
+      - position: middle
+        <<: *frequency
+      - position: middle
+        <<: *pattern
+      - position: end
+        <<: *global-extremum
+      - position: end
+        <<: *variance-large
+
+studies:
+  - name: SSA
+    algorithm: ssa
+    ntrials: 200
+    timeseries:
+      - ecg-diff-count-5
+    parameters:
+      - name: ep
+        dtype: int
+        min: 1
+        max: 10
+      - name: window_size
+        dtype: int
+        min: 5
+        max: 50
+      - name: rf_method
+        dtype: category
+        values:
+          - all
+          - alpha
+      - name: random_state
+        dtype: int
+        min: 0
+        max: 50

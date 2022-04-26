@@ -2,7 +2,11 @@ import argparse
 
 import hypaad
 from hypaad.cluster_config import ClusterConfig
-from hypaad.utils.commands import install_dependencies, setup_remote
+from hypaad.utils.commands import (
+    install_dependencies,
+    run_command,
+    setup_remote,
+)
 
 
 def main(command: str, environment: str):
@@ -21,6 +25,11 @@ def main(command: str, environment: str):
         setup_remote(hosts=hosts)
     elif command == "install":
         install_dependencies(hosts=hosts)
+    elif command == "custom":
+        custom_cmd = input(
+            "Enter the command that shall be execute on all nodes: "
+        )
+        run_command(hosts=hosts, command=custom_cmd)
     else:
         raise ValueError(f"Unknown command: {command}")
 
@@ -30,7 +39,7 @@ def parse_args():
     parser.add_argument(
         "command",
         type=str,
-        choices=["setup", "install"],
+        choices=["setup", "install", "custom"],
         help="Command to execute",
     )
     parser.add_argument(

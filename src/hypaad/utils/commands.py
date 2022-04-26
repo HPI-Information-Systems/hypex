@@ -6,7 +6,7 @@ from pathlib import Path
 
 from pssh.clients import ParallelSSHClient
 
-__all__ = ["setup_remote", "install_dependencies"]
+__all__ = ["setup_remote", "install_dependencies", "run_command"]
 
 _logger = logging.getLogger(__name__)
 
@@ -19,11 +19,19 @@ def _run_command(client: ParallelSSHClient, command: str):
         _logger.info("Exit code: %d", host_output.exit_code)
 
 
+def run_command(hosts: t.List[str], command: str):
+    client = ParallelSSHClient(hosts)
+    _run_command(
+        client=client,
+        command=command,
+    )
+
+
 def setup_remote(hosts: t.List[str]):
     client = ParallelSSHClient(hosts)
     _run_command(
         client=client,
-        command="mkdir -p ~/hypaad && python3 -m venv ~/hypaad/.venv",
+        command="mkdir -p ~/hypaad && python3 -m venv ~/hypaad/.venv && mkdir -p ~/trial_results",
     )
     _install_dependencies(client=client)
 

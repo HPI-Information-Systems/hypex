@@ -1,10 +1,12 @@
 import logging
+import random
 import typing as t
 from pathlib import Path
 
 import dask
 import dask.bag
 import dask.distributed
+import numpy as np
 import optuna
 import pandas as pd
 from gutenTAG import GutenTAG
@@ -13,6 +15,8 @@ from gutenTAG import GutenTAG
 import hypaad
 
 __all__ = ["HypaadExecutor"]
+
+seed = 1
 
 
 class HypaadExecutor:
@@ -24,7 +28,11 @@ class HypaadExecutor:
     ) -> t.List[t.Dict[str, str]]:
         data_gen = GutenTAG.from_dict(ts_config)
         data_gen.n_jobs = 1
-        data_gen.overview.add_seed(1)
+
+        data_gen.overview.add_seed(seed)
+
+        np.random.seed(seed)
+        random.seed(seed)
 
         data_gen.generate()
 
@@ -71,7 +79,7 @@ class HypaadExecutor:
         optuna_study_name: t.List[str],
         redis_url: str,
     ) -> t.List["hypaad.TrialResult"]:
-        """Executes a single study trail in the hyper-parameter optimization process.
+        """Executes a single study trial in the hyper-parameter optimization process.
 
         Args:
             trial_id: The trial ID.
@@ -103,6 +111,12 @@ class HypaadExecutor:
         return optimizer.trial_results
 
     @classmethod
+    def _compute_with_progress(cls, client, *args, **kwargs):
+        future = client.compute(*args, **kwargs)
+        dask.distributed.progress(future)
+        return client.gather(future)
+
+    @classmethod
     def execute(cls, cluster_config: hypaad.ClusterConfig, config_path: str):
         """Builds a dask task graph and executes it on a Dask SSHCluster.
 
@@ -111,6 +125,12 @@ class HypaadExecutor:
         """
         raw_config = hypaad.Config.read_yml(config_path)
         studies = hypaad.Config.from_dict(config=raw_config)
+
+        results_dir = Path("results")
+        cls._logger.info(
+            "Creating results directory at %s", results_dir.absolute()
+        )
+        results_dir.mkdir(exist_ok=True)
 
         with hypaad.Cluster(cluster_config) as cluster:
             data_paths = cluster.client.run(
@@ -137,11 +157,12 @@ class HypaadExecutor:
             cls._logger.info(
                 "Now submitting the task graph to the cluster. The computation will take some time..."
             )
+
             computed_results: t.List[
                 t.Tuple[str, t.List["hypaad.TrialResult"]]
-            ] = dask.compute(results)[0].items()
+            ] = cls._compute_with_progress(cluster.client, results).items()
             for study_name, entries in computed_results:
-                output_path = Path("results") / f"{study_name}.csv"
+                output_path = results_dir / f"{study_name}.csv"
                 cls._logger.info(
                     "Saving results of study %s to %s", study_name, output_path
                 )

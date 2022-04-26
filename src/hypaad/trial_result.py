@@ -5,11 +5,18 @@ __all__ = ["TrialResult"]
 
 
 @dataclass
+# pylint: disable=too-many-instance-attributes
 class TrialResult:
     id: int
+    worker: str
     algorithm: str
     params: t.Dict[str, t.Any]
-    auc_score: float
+    auc_pr_score: float
+    roc_auc_score: float
+    best_threshold: float
+    f1_score: float
+    accuracy_score: float
+    anomaly_scores_path: str
 
     def to_dict(self) -> t.Dict[str, t.Any]:
         """Converts the trial result to a dictionary.

@@ -103,6 +103,18 @@ class ClusterInstance:
         return f"redis://{self.config.scheduler_host}:{self.config.redis_port}"
 
     def set_up(self):
+        try:
+            c = dask.distributed.Client(
+                self.config.dask_scheduler_url(), timeout=1
+            )
+            self._logger.warning(
+                "Found a running scheduler. Thus shutting it down now..."
+            )
+            c.shutdown()
+        # Connection timeout
+        except OSError as ex:
+            self._logger.error(ex)
+
         self._logger.info("Creating dask ssh cluster...")
         self.cluster = dask.distributed.SSHCluster(
             **self.config.dask_ssh_cluster_config()
@@ -148,8 +160,8 @@ class ClusterInstance:
         self.optuna_dashboard_container_id = asyncio.run(
             self.run_on_worker_ssh(
                 worker=self.config.scheduler_host,
-                command='docker run --net host -d python:3.9 /bin/sh -c "'
-                "pip install optuna-dashboard redis "
+                command=f"docker run --net host "
+                '-d python:3.9 /bin/sh -c "pip install optuna-dashboard redis '
                 f"&& optuna-dashboard redis://localhost:{self.config.redis_port} "
                 f'--host 0.0.0.0 --port {self.config.optuna_dashboard_port}"',
                 timeout=60,
@@ -213,11 +225,12 @@ class ClusterInstance:
                 break
             # pylint: disable=broad-except
             except Exception:
+                suffix = f" [timeout={timeout}]" if timeout else ""
                 self._logger.info(
-                    "%s not up and running after %i seconds [timeout=%d]",
+                    "%s not up and running after %i seconds%s",
                     name,
                     now - start,
-                    timeout,
+                    suffix,
                 )
                 sleep(5)
 

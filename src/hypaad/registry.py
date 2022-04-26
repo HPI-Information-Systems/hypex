@@ -32,4 +32,9 @@ class Registry:
 
     @classmethod
     def default(cls):
-        return Registry(algorithms={"series2graph": hypaad.series2graph()})
+        return Registry(
+            algorithms={
+                "series2graph": hypaad.series2graph(),
+                "ssa": hypaad.ssa(),
+            }
+        )

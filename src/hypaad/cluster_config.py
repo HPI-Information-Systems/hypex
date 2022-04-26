@@ -25,6 +25,9 @@ class ClusterConfig:
     log_level: str = "INFO"
     log_filename: str = "dask.log"
 
+    def dask_scheduler_url(self) -> str:
+        return f"{self.scheduler_host}:{self.scheduler_port}"
+
     def dask_ssh_cluster_config(self) -> t.Dict[str, t.Any]:
         return {
             "hosts": [self.scheduler_host] + self.worker_hosts,
