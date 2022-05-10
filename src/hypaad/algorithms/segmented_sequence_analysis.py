@@ -5,6 +5,6 @@ __all__ = ["ssa"]
 
 def ssa() -> AlgorithmExecutor:
     return AlgorithmExecutor(
-        image_name="sopedu:5000/akita/ssa",
+        image_name="ghcr.io/mschroederi/ssa:latest",
         postprocess=None,
     )

@@ -3,7 +3,9 @@ PYTHON=${VENV_NAME}/bin/python3
 PACKAGE_DIR=src/hypaad
 
 cluster:
+	rm -r .local && mkdir .local
 	docker compose down -v --remove-orphans
+	docker compose rm
 	docker build --ssh default . -t hypaad-controller -f Dockerfile.controller
 	docker build --ssh default . -t hypaad-node -f Dockerfile.node
 	docker-compose up --build
@@ -13,11 +15,11 @@ run:
 	make push-images
 	docker exec hypaad_controller /bin/sh -c "ssh-keyscan node-0 >> ~/.ssh/known_hosts"
 	docker exec hypaad_controller /bin/sh -c "ssh-keyscan node-1 >> ~/.ssh/known_hosts"
-	docker exec hypaad_controller /bin/sh -c "python3 ${PACKAGE_DIR}"
+	docker exec hypaad_controller /bin/sh -c "python3 ${PACKAGE_DIR} --config sanity-check.yaml"
 
 run-remote:
 	make package
-	${PYTHON} ${PACKAGE_DIR} --environment remote
+	${PYTHON} ${PACKAGE_DIR} --environment remote --config sanity-check.yaml
 
 logs:
 	docker compose logs -f
@@ -54,6 +56,7 @@ lint:
 format:
 	${PYTHON} -m isort --profile black ${PACKAGE_DIR}
 	${PYTHON} -m black -l 80 ${PACKAGE_DIR}
+	Rscript format.R
 
 test:
 	${PYTHON} -m pytest tests -vv
@@ -61,6 +64,7 @@ test:
 install:
 	${PYTHON} -m pip install pip-tools
 	${PYTHON} -m pip install -r requirements-dev.txt
+	Rscript requirements.R
 
 deps:
 	${PYTHON} -m piptools compile requirements.in

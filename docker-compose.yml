@@ -20,6 +20,8 @@ services:
       - 6379:6379 # Redis
       - 8787:8787 # Dask Dashboard
       - 8080:8080 # Optuna Dashboard
+    volumes:
+      - .local/node-0/:/home/admin/:rw
 
   node-1:
     container_name: hypaad_node-1
@@ -27,3 +29,5 @@ services:
     image: hypaad-node
     ports:
       - 34443:34443
+    volumes:
+      - .local/node-1/:/home/admin/:rw

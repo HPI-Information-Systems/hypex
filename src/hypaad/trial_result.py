@@ -7,6 +7,7 @@ __all__ = ["TrialResult"]
 @dataclass
 # pylint: disable=too-many-instance-attributes
 class TrialResult:
+    study_name: str
     id: int
     worker: str
     algorithm: str
@@ -17,6 +18,7 @@ class TrialResult:
     f1_score: float
     accuracy_score: float
     anomaly_scores_path: str
+    is_csl_input: t.Optional[bool] = None
 
     def to_dict(self) -> t.Dict[str, t.Any]:
         """Converts the trial result to a dictionary.

@@ -43,7 +43,9 @@ bokeh==2.4.2
 bottle==0.12.19
     # via optuna-dashboard
 cffi==1.15.0
-    # via argon2-cffi-bindings
+    # via
+    #   argon2-cffi-bindings
+    #   rpy2
 charset-normalizer==2.0.12
     # via aiohttp
 click==8.1.2
@@ -116,6 +118,7 @@ jinja2==3.1.1
     #   distributed
     #   jupyter-server
     #   nbconvert
+    #   rpy2
 joblib==1.1.0
     # via scikit-learn
 jsonschema==4.4.0
@@ -230,6 +233,8 @@ pluggy==1.0.0
     # via
     #   pytest
     #   tox
+portalocker==2.4.0
+    # via -r requirements-base.in
 prettytable==3.2.0
     # via cliff
 prometheus-client==0.14.1
@@ -267,7 +272,11 @@ python-dateutil==2.8.2
     #   jupyter-client
     #   pandas
 pytz==2022.1
-    # via pandas
+    # via
+    #   pandas
+    #   rpy2
+pytz-deprecation-shim==0.1.0.post0
+    # via tzlocal
 pyyaml==6.0
     # via
     #   -r requirements-base.in
@@ -281,6 +290,8 @@ pyzmq==22.3.0
     #   jupyter-client
     #   jupyter-server
 redis==4.2.2
+    # via -r requirements-base.in
+rpy2==3.5.1
     # via -r requirements-base.in
 scikit-learn==1.0.2
     # via optuna-dashboard
@@ -366,6 +377,10 @@ typing-extensions==4.1.1
     #   black
     #   bokeh
     #   pylint
+tzdata==2022.1
+    # via pytz-deprecation-shim
+tzlocal==4.2
+    # via rpy2
 urllib3==1.26.9
     # via distributed
 virtualenv==20.14.1

@@ -84,8 +84,15 @@ LOCAL_CLUSTER_CONFIG = ClusterConfig(
     },
 )
 
+# REMOTE_CLUSTER_CONFIG = ClusterConfig(
+#     scheduler_host="odin01",
+#     worker_hosts=[f"odin{i:02d}" for i in range(1, 15)],
+#     remote_python="~/hypaad/.venv/bin/python",
+# )
+
 REMOTE_CLUSTER_CONFIG = ClusterConfig(
-    scheduler_host="odin01",
-    worker_hosts=[f"odin{i:02d}" for i in range(1, 15)],
+    scheduler_host="ec2-35-158-116-195.eu-central-1.compute.amazonaws.com",
+    worker_hosts=["ec2-35-158-116-195.eu-central-1.compute.amazonaws.com"],
     remote_python="~/hypaad/.venv/bin/python",
+    tasks_per_host=12,
 )

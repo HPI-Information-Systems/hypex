@@ -1,6 +1,7 @@
 import logging
 import typing as t
 from pathlib import Path
+from uuid import uuid4
 
 import numpy as np
 import optuna
@@ -34,13 +35,17 @@ class Optimizer:
             self.registry = hypaad.Registry.default()
 
     def _run_algorithm(
-        self, algorithm: str, dataset_path: str, params: t.Dict[str, t.Any]
+        self,
+        algorithm: str,
+        dataset_path: str,
+        results_dir: Path,
+        params: t.Dict[str, t.Any],
     ) -> np.ndarray:
         executor = self.registry.get_algorithm(algorithm)
 
         args = {
             "hyper_params": params,
-            "results_path": Path("./results"),
+            "results_path": results_dir,
             "resource_constraints": timeeval.ResourceConstraints(
                 task_cpu_limit=1
             ),
@@ -67,6 +72,9 @@ class Optimizer:
 
         test_is_anomaly = pd.read_csv(test_dataset_path)["is_anomaly"]
 
+        trial_results_path = Path("trial_results")
+        trial_results_path.mkdir(exist_ok=True)
+
         def func(trial: optuna.Trial):
             # Generate a next best parameter guess
             params = study.next_parameter_guess(trial)
@@ -75,14 +83,17 @@ class Optimizer:
             # TODO: supervised and semi-supervised detectors
 
             # Evaluate the algorithm's performance on the test dataset
+            results_dir = Path("/tmp/hypaad-anomaly-scores")
+            results_dir.mkdir(exist_ok=True)
             anomaly_scores = self._run_algorithm(
                 algorithm=study.algorithm,
                 dataset_path=test_dataset_path,
+                results_dir=results_dir / str(uuid4()),
                 params=params,
             )
             self._logger.info("Writing anomaly scores to disk...")
             score_path = (
-                Path("trial_results")
+                trial_results_path
                 / f"{study.name}__trial-{trial.number}__scores.csv"
             )
             pd.DataFrame({"anomaly_scores": anomaly_scores}).to_csv(
@@ -125,6 +136,7 @@ class Optimizer:
             # Store the trial's result
             self.trial_results.append(
                 hypaad.TrialResult(
+                    study_name=study.name,
                     id=trial.number,
                     worker=get_worker().name,
                     algorithm=study.algorithm,

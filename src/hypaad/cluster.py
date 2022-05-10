@@ -126,12 +126,12 @@ class ClusterInstance:
 
         self._logger.info(
             "Now waiting for %d workers to be up and running...",
-            len(self.config.worker_hosts),
+            len(self.config.worker_hosts) * self.config.tasks_per_host,
         )
         self.client.wait_for_workers(len(self.config.worker_hosts))
         self._logger.info(
             "All %d workers are now up and running. Proceding setup",
-            len(self.config.worker_hosts),
+            len(self.config.worker_hosts) * self.config.tasks_per_host,
         )
 
         self._logger.info("Uploading local changes to cluster...")
@@ -156,25 +156,25 @@ class ClusterInstance:
             ping_func=redis.ping,
         )
 
-        self._logger.info("Now starting Optuna dashboard...")
-        self.optuna_dashboard_container_id = asyncio.run(
-            self.run_on_worker_ssh(
-                worker=self.config.scheduler_host,
-                command=f"docker run --net host "
-                '-d python:3.9 /bin/sh -c "pip install optuna-dashboard redis '
-                f"&& optuna-dashboard redis://localhost:{self.config.redis_port} "
-                f'--host 0.0.0.0 --port {self.config.optuna_dashboard_port}"',
-                timeout=60,
-            )
-        )[1].stdout.strip()
-        self._wait_until_up_and_running(
-            name="Optuna Dashboard",
-            ping_func=lambda: self._assert_host_port_reachable(
-                host=self.config.scheduler_host,
-                port=self.config.optuna_dashboard_port,
-            ),
-            timeout=60,
-        )
+        # self._logger.info("Now starting Optuna dashboard...")
+        # self.optuna_dashboard_container_id = asyncio.run(
+        #     self.run_on_worker_ssh(
+        #         worker=self.config.scheduler_host,
+        #         command=f"docker run --net host "
+        #         '-d python:3.9 /bin/sh -c "pip install optuna-dashboard redis '
+        #         f"&& optuna-dashboard redis://localhost:{self.config.redis_port} "
+        #         f'--host 0.0.0.0 --port {self.config.optuna_dashboard_port}"',
+        #         timeout=60,
+        #     )
+        # )[1].stdout.strip()
+        # self._wait_until_up_and_running(
+        #     name="Optuna Dashboard",
+        #     ping_func=lambda: self._assert_host_port_reachable(
+        #         host=self.config.scheduler_host,
+        #         port=self.config.optuna_dashboard_port,
+        #     ),
+        #     timeout=60,
+        # )
 
     def _upload_local_code_changes(self):
         FILTER = "./dist/*.egg"

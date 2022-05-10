@@ -42,20 +42,42 @@ def _install_dependencies(client: ParallelSSHClient):
         client=client, command="ssh-keyscan gitlab.hpi.de >> ~/.ssh/known_hosts"
     )
 
-    # Make a local copy from the file to upload
-    shutil.copyfile("requirements.txt", "requirements-tmp.txt")
+    def execute(path: str, temp_path: str, dest_path: str, install_cmd: str):
+        # Make a local copy from the file to upload
+        shutil.copyfile(path, temp_path)
 
-    src = Path("requirements-tmp.txt").absolute()
-    dest = "hypaad/requirements.txt"
-    _logger.info("Now copying file from %s to %s on remote hosts", src, dest)
-    client.copy_file(src, dest)
-    client.join()
-    os.remove(src)
+        src = Path(temp_path).absolute()
+        _logger.info(
+            "Now copying file from %s to %s on remote hosts", src, dest_path
+        )
+        client.copy_file(src, dest_path)
+        client.join()
+        os.remove(src)
 
-    _logger.info("Now installing dependencies on remote hosts")
+        _logger.info("Now installing dependencies on remote hosts")
+        _run_command(
+            client=client,
+            command=install_cmd,
+        )
+
+    execute(
+        path="requirements.txt",
+        temp_path="requirements-tmp.txt",
+        dest_path="hypaad/requirements.txt",
+        install_cmd="~/hypaad/.venv/bin/python -m pip install -r ~/hypaad/requirements.txt",
+    )
+
+    _logger.info("Now installing R on remote hosts")
     _run_command(
         client=client,
-        command="~/hypaad/.venv/bin/python -m pip install -r ~/hypaad/requirements.txt",
+        command="apt-get install -y r-base r-base-core r-recommended",
+    )
+
+    execute(
+        path="requirements.R",
+        temp_path="requirements-tmp.R",
+        dest_path="hypaad/requirements.R",
+        install_cmd="RScript requirements.R",
     )
 
 

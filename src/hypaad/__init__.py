@@ -7,9 +7,11 @@ from .algorithms import *
 from .cluster import *
 from .cluster_config import *
 from .config import *
+from .csl import *
 from .early_stopping import *
 from .hypaad_executor import *
 from .optimizer import *
+from .r_bridge import *
 from .registry import *
 from .trial_result import *
 from .utils import *
@@ -32,8 +34,10 @@ __all__ = (
     + config.__all__
     + cluster.__all__
     + cluster_config.__all__
+    + csl.__all__
     + hypaad_executor.__all__
     + optimizer.__all__
+    + r_bridge.__all__
     + registry.__all__
     + trial_result.__all__
     + utils.__all__
