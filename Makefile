@@ -19,7 +19,7 @@ run:
 
 run-remote:
 	make package
-	${PYTHON} ${PACKAGE_DIR} --environment remote --config sanity-check.yaml
+	${PYTHON} ${PACKAGE_DIR} --environment remote --config evaluation.yaml 2>&1 | tee run.log
 
 logs:
 	docker compose logs -f
@@ -56,7 +56,6 @@ lint:
 format:
 	${PYTHON} -m isort --profile black ${PACKAGE_DIR}
 	${PYTHON} -m black -l 80 ${PACKAGE_DIR}
-	Rscript format.R
 
 test:
 	${PYTHON} -m pytest tests -vv
@@ -64,7 +63,6 @@ test:
 install:
 	${PYTHON} -m pip install pip-tools
 	${PYTHON} -m pip install -r requirements-dev.txt
-	Rscript requirements.R
 
 deps:
 	${PYTHON} -m piptools compile requirements.in

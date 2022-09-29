@@ -35,6 +35,15 @@ class Registry:
         return Registry(
             algorithms={
                 "series2graph": hypaad.series2graph(),
-                "ssa": hypaad.ssa(),
+                "stomp": hypaad.stomp(),
+                "grammarviz3": hypaad.grammarviz3(),
+                "iforest": hypaad.iforest(),
+                "sub_lof": hypaad.sub_lof(),
+                "sub_if": hypaad.sub_if(),
+                "dbstream": hypaad.dbstream(),
+                "torsk": hypaad.torsk(),
+                "dwt-mlead": hypaad.dwt_mlead(),
+                "donut": hypaad.donut(),
+                # "pst": hypaad.pst(),
             }
         )

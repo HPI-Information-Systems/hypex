@@ -1,6 +1,6 @@
 base:
   - &base-ts
-    length: 10000
+    length: 1000
     channels: 1
     semi-supervised: true
     supervised: true
@@ -68,26 +68,96 @@ timeseries:
         <<: *variance-large
 
 studies:
-  - name: SSA
-    algorithm: ssa
+  # - name: SSA.int-osci.max-window-80
+  #   algorithm: ssa
+  #   ntrials: 150
+  #   n_repeat: 2
+  #   timeseries:
+  #     - name: ecg-diff-count-5
+  #       n_samples: 10
+  #       mutations:
+  #         - path: base-oscillation.frequency
+  #           dtype: int
+  #           min: 2
+  #           max: 20
+  #   parameters:
+  #     - name: ep
+  #       dtype: int
+  #       min: 1
+  #       max: 10
+  #     - name: window_size
+  #       dtype: int
+  #       min: 3
+  #       max: 80
+  #     - name: rf_method
+  #       dtype: category
+  #       values:
+  #         - all
+  #         - alpha
+  #     - name: random_state
+  #       dtype: int
+  #       min: 1
+  #       max: 10
+  # - name: SSA
+  #   algorithm: ssa
+  #   ntrials: 250
+  #   n_repeat: 3
+  #   timeseries:
+  #     - name: ecg-diff-count-5
+  #       n_samples: 10
+  #       mutations:
+  #         - path: base-oscillation.frequency
+  #           dtype: int
+  #           min: 2
+  #           max: 12
+  #   parameters:
+  #     - name: ep
+  #       dtype: int
+  #       min: 1
+  #       max: 10
+  #     - name: window_size
+  #       dtype: int
+  #       min: 5
+  #       max: 120
+  #     - name: rf_method
+  #       dtype: category
+  #       values:
+  #         - all
+  #         - alpha
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 20
+  - name: S2G.full-vars
+    algorithm: series2graph
     ntrials: 200
+    n_repeat: 3
     timeseries:
-      - ecg-diff-count-5
+      - name: ecg-diff-count-5
+        n_samples: 10
+        mutations:
+          - path: base-oscillation.frequency
+            dtype: int
+            min: 2
+            max: 12
     parameters:
-      - name: ep
+      - name: query_window_size
         dtype: int
-        min: 1
-        max: 10
+        min: 10
+        max: 150
       - name: window_size
         dtype: int
-        min: 5
-        max: 50
-      - name: rf_method
-        dtype: category
-        values:
-          - all
-          - alpha
+        min: 10
+        max: 120
+      - name: rate
+        dtype: int
+        min: 10
+        max: 150
+      - name: convolution_size
+        dtype: int
+        min: 10
+        max: 120
       - name: random_state
         dtype: int
         min: 0
-        max: 50
+        max: 42

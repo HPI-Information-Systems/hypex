@@ -1,6 +1,9 @@
+import os
 import sys
 import typing as t
 from dataclasses import dataclass, field
+
+from .optuna_storage import OptunaStorage, OptunaStorageType
 
 __all__ = ["ClusterConfig", "LOCAL_CLUSTER_CONFIG", "REMOTE_CLUSTER_CONFIG"]
 
@@ -19,11 +22,19 @@ class ClusterConfig:
     connect_options: t.Dict[str, t.Any] = field(default_factory=dict)
 
     scheduler_port: int = 8786
-    redis_port: int = 6379
     optuna_dashboard_port: int = 8080
 
     log_level: str = "INFO"
     log_filename: str = "dask.log"
+
+    optuna_storage: OptunaStorage = None
+
+    def __post_init__(self):
+        if not self.optuna_storage:
+            self.optuna_storage = OptunaStorage.get(
+                storage_type=OptunaStorageType.MYSQL,
+                scheduler_host=self.scheduler_host,
+            )
 
     def dask_scheduler_url(self) -> str:
         return f"{self.scheduler_host}:{self.scheduler_port}"
@@ -33,7 +44,7 @@ class ClusterConfig:
             "hosts": [self.scheduler_host] + self.worker_hosts,
             "connect_options": self.connect_options,
             "worker_options": {
-                "nprocs": self.tasks_per_host,
+                "nworkers": self.tasks_per_host,
                 "nthreads": 1,
                 "memory_limit": self.task_memory_limit,
             },
@@ -90,9 +101,11 @@ LOCAL_CLUSTER_CONFIG = ClusterConfig(
 #     remote_python="~/hypaad/.venv/bin/python",
 # )
 
+EC2_NODE = "ec2-35-158-134-31.eu-central-1.compute.amazonaws.com"
+
 REMOTE_CLUSTER_CONFIG = ClusterConfig(
-    scheduler_host="ec2-35-158-116-195.eu-central-1.compute.amazonaws.com",
-    worker_hosts=["ec2-35-158-116-195.eu-central-1.compute.amazonaws.com"],
-    remote_python="~/hypaad/.venv/bin/python",
-    tasks_per_host=12,
+    scheduler_host=EC2_NODE,
+    worker_hosts=[EC2_NODE],
+    remote_python=sys.executable,  # "~/hypaad/.venv/bin/python",
+    tasks_per_host=os.cpu_count() - 6,
 )

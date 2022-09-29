@@ -4,14 +4,16 @@
 apt-get install -y make
 
 # Install Python venv
-apt-get install -y python3-venv
-
-# Install R
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
-add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-apt-get install -y r-base r-base-core r-recommended
+apt-get install -y python3-venv python3-dev
+apt-get install -y gcc
 
 # Install Docker
 curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
+sh get-docker.sh
 rm get-docker.sh
+usermod -aG docker $USER
+systemctl restart docker
+
+# MySQL Setup
+sudo apt-get install python3-dev default-libmysqlclient-dev build-essential
+# On MacOS: brew install mysql

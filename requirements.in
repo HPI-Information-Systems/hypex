@@ -1,4 +1,5 @@
 -r requirements-ci.in
 
 git+ssh://git@gitlab.hpi.de/mats.poerschke/timeeval.git@dev
-git+ssh://git@gitlab.hpi.de/mats.poerschke/guten-tag.git
+git+ssh://git@gitlab.hpi.de/mats.poerschke/guten-tag.git@requirements
+git+ssh://git@github.com/oxcsml/kerpy.git

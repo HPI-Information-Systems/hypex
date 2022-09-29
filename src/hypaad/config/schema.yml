@@ -7,14 +7,39 @@ properties:
       properties:
         name:
           type: string
-        image:
+        algorithm:
           type: string
-        ntrials:
-          type: integer
+        n_trials:
+          type: object
+          properties:
+            train:
+              type: integer
+            validation:
+              type: integer
+            test:
+              type: integer
         timeseries:
           type: array
-          itmes:
-            type: string
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              n_mutations:
+                type: integer
+              mutations:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    path:
+                      type: string
+                    dtype:
+                      type: string
+                    min:
+                      type: number
+                    max:
+                      type: number
         parameters:
           type: array
           items:

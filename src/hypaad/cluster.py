@@ -11,11 +11,12 @@ from types import TracebackType
 import asyncssh
 import dask
 import dask.distributed
+import numpy as np
 from dask import config as dask_config
-from redis import Redis
 
 # pylint: disable=cyclic-import,unused-import
 import hypaad
+from hypaad.optuna_storage import OptunaStorage
 
 __all__ = ["Cluster", "ClusterInstance"]
 
@@ -23,7 +24,7 @@ __all__ = ["Cluster", "ClusterInstance"]
 class ClusterInstance:
     client: t.Optional[dask.distributed.Client] = None
     cluster: t.Optional[dask.distributed.SSHCluster] = None
-    redis_container_id: t.Optional[str] = None
+    running_container_ids: t.List[str] = []
     optuna_dashboard_container_id: t.Optional[str] = None
 
     def __init__(self, config: "hypaad.ClusterConfig") -> None:
@@ -99,9 +100,6 @@ class ClusterInstance:
             )
         return results
 
-    def get_redis_uri(self) -> str:
-        return f"redis://{self.config.scheduler_host}:{self.config.redis_port}"
-
     def set_up(self):
         try:
             c = dask.distributed.Client(
@@ -115,10 +113,16 @@ class ClusterInstance:
         except OSError as ex:
             self._logger.error(ex)
 
-        self._logger.info("Creating dask ssh cluster...")
-        self.cluster = dask.distributed.SSHCluster(
-            **self.config.dask_ssh_cluster_config()
+        self._logger.info("Creating dask SSH cluster...")
+
+        self.cluster = dask.distributed.LocalCluster(
+            n_workers=self.config.tasks_per_host,
+            processes=True,
+            threads_per_worker=1,
         )
+        # dask.distributed.SSHCluster(
+        #     **self.config.dask_ssh_cluster_config()
+        # )
         self.client = dask.distributed.Client(self.cluster.scheduler_address)
         self._logger.info("Successfully connected to the dask cluster")
 
@@ -134,47 +138,9 @@ class ClusterInstance:
             len(self.config.worker_hosts) * self.config.tasks_per_host,
         )
 
-        self._logger.info("Uploading local changes to cluster...")
-        self._upload_local_code_changes()
-        self._logger.info("Sucessfully uploaded local changes to cluster")
-
-        self._logger.info("Setting up Redis container on scheduler...")
-        self.redis_container_id = asyncio.run(
-            self.run_on_worker_ssh(
-                worker=self.config.scheduler_host,
-                command="docker run -p 0.0.0.0:6379:6379 -d redis:latest",
-                timeout=60,
-            )
-        )[1].stdout.strip()
-        self._logger.info(
-            "Redis container started with id %s", self.redis_container_id
-        )
-
-        redis = Redis.from_url(self.get_redis_uri(), socket_connect_timeout=1)
-        self._wait_until_up_and_running(
-            name="Redis",
-            ping_func=redis.ping,
-        )
-
-        # self._logger.info("Now starting Optuna dashboard...")
-        # self.optuna_dashboard_container_id = asyncio.run(
-        #     self.run_on_worker_ssh(
-        #         worker=self.config.scheduler_host,
-        #         command=f"docker run --net host "
-        #         '-d python:3.9 /bin/sh -c "pip install optuna-dashboard redis '
-        #         f"&& optuna-dashboard redis://localhost:{self.config.redis_port} "
-        #         f'--host 0.0.0.0 --port {self.config.optuna_dashboard_port}"',
-        #         timeout=60,
-        #     )
-        # )[1].stdout.strip()
-        # self._wait_until_up_and_running(
-        #     name="Optuna Dashboard",
-        #     ping_func=lambda: self._assert_host_port_reachable(
-        #         host=self.config.scheduler_host,
-        #         port=self.config.optuna_dashboard_port,
-        #     ),
-        #     timeout=60,
-        # )
+        # self._logger.info("Uploading local changes to cluster...")
+        # self._upload_local_code_changes()
+        # self._logger.info("Sucessfully uploaded local changes to cluster")
 
     def _upload_local_code_changes(self):
         FILTER = "./dist/*.egg"
@@ -201,6 +167,56 @@ class ClusterInstance:
         finally:
             sock.close()
 
+    def start_optuna_shared_storage(self) -> str:
+        self._logger.info(
+            "Setting up %s container on scheduler...",
+            self.config.optuna_storage.type,
+        )
+        container_id = asyncio.run(
+            self.run_on_worker_ssh(
+                worker=self.config.scheduler_host,
+                command=self.config.optuna_storage.get_docker_command(),
+                timeout=60,
+            )
+        )[1].stdout.strip()
+        self._logger.info(
+            "%s container started with id %s",
+            self.config.optuna_storage.type,
+            container_id,
+        )
+        self.running_container_ids.append(container_id)
+        url = self.config.optuna_storage.get_uri()
+
+        self._wait_until_up_and_running(
+            name=self.config.optuna_storage.type,
+            ping_func=self.config.optuna_storage.get_ping_func(),
+        )
+        return url
+
+    def start_optuna_dashboard(self, wait=False):
+        self._logger.info("Now starting Optuna dashboard...")
+        storage_url = self.config.optuna_storage.get_uri()
+        self.optuna_dashboard_container_id = asyncio.run(
+            self.run_on_worker_ssh(
+                worker=self.config.scheduler_host,
+                command=f"docker run --net host "
+                '-d python:3.9 /bin/sh -c "pip install optuna-dashboard redis mysqlclient '
+                f"&& optuna-dashboard {storage_url} "
+                f'--host 0.0.0.0 --port {self.config.optuna_dashboard_port}"',
+                timeout=60,
+            )
+        )[1].stdout.strip()
+
+        if wait:
+            self._wait_until_up_and_running(
+                name="Optuna Dashboard",
+                ping_func=lambda: self._assert_host_port_reachable(
+                    host=self.config.scheduler_host,
+                    port=self.config.optuna_dashboard_port,
+                ),
+                timeout=60,
+            )
+
     def _wait_until_up_and_running(
         self,
         name: str,
@@ -224,13 +240,14 @@ class ClusterInstance:
                 )
                 break
             # pylint: disable=broad-except
-            except Exception:
+            except Exception as e:
                 suffix = f" [timeout={timeout}]" if timeout else ""
                 self._logger.info(
-                    "%s not up and running after %i seconds%s",
+                    "%s not up and running after %i seconds%s [Exception=%s]",
                     name,
                     now - start,
                     suffix,
+                    e,
                 )
                 sleep(5)
 
@@ -246,24 +263,35 @@ class ClusterInstance:
             )
             asyncio.run(
                 self.run_on_worker_ssh(
-                    self.config.scheduler_host,
-                    f"docker stop {self.optuna_dashboard_container_id}",
+                    worker=self.config.scheduler_host,
+                    command=f"docker stop {self.optuna_dashboard_container_id} "
+                    f"&& docker container rm {self.optuna_dashboard_container_id}",
                 )
             )
             self._logger.info("Stopped Optuna Dashboard container on scheduler")
 
-        if self.redis_container_id:
+        for idx, container_id in enumerate(self.running_container_ids):
             self._logger.info(
-                "Stopping Redis container %s on scheduler...",
-                self.redis_container_id,
+                "Stopping %s container %s on scheduler [%d/%d] ...",
+                self.config.optuna_storage.type,
+                container_id,
+                idx + 1,
+                len(self.running_container_ids),
             )
             asyncio.run(
                 self.run_on_worker_ssh(
-                    self.config.scheduler_host,
-                    f"docker stop {self.redis_container_id}",
+                    worker=self.config.scheduler_host,
+                    command=f"docker stop {container_id}"
+                    f"&& docker container rm {container_id}",
                 )
             )
-            self._logger.info("Stopped Redis container on scheduler")
+            self._logger.info(
+                "Stopped %s container %s on scheduler [%d/%d]",
+                self.config.optuna_storage.type,
+                container_id,
+                idx + 1,
+                len(self.running_container_ids),
+            )
 
         if self.client:
             self.client.close()

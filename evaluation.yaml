@@ -1,0 +1,1326 @@
+base:
+  - &base-ts
+    length: 10000
+    channels: 1
+    semi-supervised: false
+    supervised: false
+  - &base-osci
+    frequency: 5.0
+    variance: 0.05
+
+
+anomaly_kinds:
+  - &global-extremum
+    length: 1
+    kinds:
+      - kind: "extremum"
+        min: false
+        local: false
+  - &frequency
+    length: 100
+    kinds:
+      - kind: "frequency"
+        frequency_factor: 2.0
+  - &pattern
+    length: 100
+    kinds:
+      - kind: "pattern"
+        sinusoid_k: 10.0
+        cbf_pattern_factor: 2
+  - &pattern-shift
+    length: 100
+    kinds:
+      - kind: "pattern-shift"
+        shift_by: 10
+        transition_window: 10
+  - &variance-large
+    length: 100
+    kinds:
+      - kind: "variance"
+        variance: 0.4
+  - &platform
+    length: 100
+    kinds:
+      - kind: "platform"
+        value: 0.0
+  - &mean
+    length: 100
+    kinds:
+      - kind: "mean"
+        offset: 0.2
+  - &local-extremum
+    length: 1
+    kinds:
+      - kind: "extremum"
+        min: true
+        local: true
+        context_window: 50
+
+
+anomalies:
+ - &anomalies-preset
+    anomalies:
+      - position: beginning
+        <<: *variance-large
+      - position: middle
+        <<: *frequency
+      - position: middle
+        <<: *pattern
+ - &anomalies-no-frequency
+    anomalies:
+      - position: beginning
+        <<: *variance-large
+      - position: middle
+        <<: *platform
+      - position: middle
+        <<: *local-extremum
+
+
+timeseries:
+  - name: sine-base
+    <<: *base-ts
+    base-oscillation:
+      <<: *base-osci
+      kind: "sine"
+      amplitude: 1.0
+    <<: *anomalies-preset
+  - name: sine-linear-trend
+    <<: *base-ts
+    base-oscillation:
+      <<: *base-osci
+      kind: "sine"
+      amplitude: 1.0
+      trend:
+        kind: "polynomial"
+        polynomial: [ 2, 2 ]
+    <<: *anomalies-preset
+
+  - name: ecg-base
+    <<: *base-ts
+    base-oscillation:
+      <<: *base-osci
+      kind: "ecg"
+    <<: *anomalies-preset
+  - name: ecg-linear-trend
+    <<: *base-ts
+    base-oscillation:
+      <<: *base-osci
+      kind: "ecg"
+      trend:
+        kind: "polynomial"
+        polynomial: [ 2, 2 ]
+    <<: *anomalies-preset
+
+  - name: random-walk-base
+    <<: *base-ts
+    base-oscillation:
+      kind: "random-walk"
+      amplitude: 1.0
+      variance: 0.05
+    <<: *anomalies-no-frequency
+  - name: random-walk-linear-trend
+    <<: *base-ts
+    base-oscillation:
+      kind: "random-walk"
+      amplitude: 1.0
+      variance: 0.05
+      trend:
+        kind: "polynomial"
+        polynomial: [3, 3]
+        amplitude: 2
+    <<: *anomalies-no-frequency
+
+  - name: cylinder-bell-funnel-base
+    <<: *base-ts
+    base-oscillation:
+      kind: "cylinder-bell-funnel"
+      amplitude: 1.0
+      avg-pattern-length: 160
+      variance-pattern-length: 0.2
+      variance-amplitude: 0.1
+      variance: 0.05
+      offset: 12.4
+    <<: *anomalies-no-frequency
+  - name: cylinder-bell-funnel-linear-trend
+    <<: *base-ts
+    base-oscillation:
+      kind: "cylinder-bell-funnel"
+      amplitude: 1.0
+      avg-pattern-length: 160
+      variance-pattern-length: 0.2
+      variance-amplitude: 0.1
+      variance: 0.05
+      offset: 12.4
+      trend:
+        kind: "polynomial"
+        polynomial: [ 2, 2 ]
+    <<: *anomalies-no-frequency
+
+  - name: polynomial-base
+    <<: *base-ts
+    base-oscillation:
+      kind: "polynomial"
+      polynomial: [-8, 8, 2, -10]
+      variance: 0.05
+      offset: -2
+    <<: *anomalies-no-frequency
+  - name: polynomial-sine-trend
+    <<: *base-ts
+    base-oscillation:
+      kind: "polynomial"
+      polynomial: [-8, 8, 2, -10]
+      variance: 0.05
+      offset: -2
+      offset: 34.2
+      trend:
+        kind: "sine"
+        frequency: 0.1
+        amplitude: 0.5
+    <<: *anomalies-no-frequency
+
+
+mutations:
+  - &mutation-base-osci-freq
+    name: base-oscillation.frequency
+    paths:
+      - base-oscillation.frequency
+    dtype: int
+    min: 4
+    max: 8
+  - &mutation-base-osci-var
+    name: base-oscillation.variance
+    paths:
+      - base-oscillation.variance
+    dtype: float
+    min: 0.05
+    max: 0.25
+  - &mutation-anomalies-len
+    name: anomalies.length
+    paths:
+      - anomalies.0.length
+      - anomalies.1.length
+      - anomalies.2.length
+      - anomalies.3.length
+      - anomalies.4.length
+      - anomalies.5.length
+      - anomalies.6.length
+      - anomalies.7.length
+      - anomalies.8.length
+    dtype: int
+    min: 40
+    max: 160
+  - &anomalies-duplication-2x
+    name: anomalies-duplication-factor
+    is_csl_input: false
+    paths:
+      - __HYPAAD_LIST_DUPLICATON__.anomalies
+    dtype: int
+    min: 1
+    max: 2
+  - &anomalies-duplication-3x
+    name: anomalies-duplication-factor
+    is_csl_input: false
+    paths:
+      - __HYPAAD_LIST_DUPLICATON__.anomalies
+    dtype: int
+    min: 1
+    max: 3
+
+  - &mutations-base
+    n_mutations: 50
+    mutations:
+      - <<: *mutation-base-osci-freq
+      - <<: *mutation-base-osci-var
+      - <<: *mutation-anomalies-len
+      - <<: *anomalies-duplication-3x
+  - &mutations-no-freq
+    n_mutations: 50
+    mutations:
+      - <<: *mutation-base-osci-var
+      - <<: *mutation-anomalies-len
+      - <<: *anomalies-duplication-3x
+
+
+studies:
+  - name: STOMP_a7bec70ca8b5e931b988bd90be29effa
+    study_override: true
+    algorithm: stomp
+    n_trials:
+      train: 300
+      validation: 80
+      test_model: 100
+      test_full_optimization: 300
+    start_from_snapshot:
+      study_name: STOMP_a7bec70ca8b5e931b988bd90be29effa
+      train: true
+      best_thresholds: true
+      fixed_parameters: false
+      test: false
+    timeseries:
+      - name: sine-base
+        <<: *mutations-base
+    parameters:
+      - name: anomaly_window_size
+        dtype: int
+        min: 10
+        max: 300
+      - name: exclusion_zone
+        dtype: float
+        min: 0.1
+        max: 1.0
+      - name: random_state
+        dtype: int
+        min: 0
+        max: 42
+  - name: STOMP_5e51d68c30015fab2677185ec0ed6627
+    study_override: true
+    algorithm: stomp
+    n_trials:
+      train: 300
+      validation: 20
+      test_model: 100
+      test_full_optimization: 300
+    start_from_snapshot:
+      study_name: STOMP_5e51d68c30015fab2677185ec0ed6627
+      train: true
+      best_thresholds: true
+      fixed_parameters: false
+      test: false
+    timeseries:
+      - name: sine-base
+        <<: *mutations-base
+    parameters:
+      - name: anomaly_window_size
+        dtype: int
+        min: 10
+        max: 300
+      - name: exclusion_zone
+        dtype: float
+        min: 0.1
+        max: 1.0
+      - name: random_state
+        dtype: int
+        min: 0
+        max: 42
+  - name: STOMP_287c11138ca68d6961d4d3e5c5dc0231
+    study_override: true
+    algorithm: stomp
+    n_trials:
+      train: 300
+      validation: 20
+      test_model: 100
+      test_full_optimization: 300
+    start_from_snapshot:
+      study_name: STOMP_287c11138ca68d6961d4d3e5c5dc0231
+      train: true
+      best_thresholds: true
+      fixed_parameters: false
+      test: false
+    timeseries:
+      - name: sine-base
+        <<: *mutations-base
+    parameters:
+      - name: anomaly_window_size
+        dtype: int
+        min: 10
+        max: 300
+      - name: exclusion_zone
+        dtype: float
+        min: 0.1
+        max: 1.0
+      - name: random_state
+        dtype: int
+        min: 0
+        max: 42
+  - name: STOMP_6900879628675d7bd0db971c02dc6b3b
+    study_override: true
+    algorithm: stomp
+    n_trials:
+      train: 300
+      validation: 80
+      test_model: 100
+      test_full_optimization: 300
+    start_from_snapshot:
+      study_name: STOMP_6900879628675d7bd0db971c02dc6b3b
+      train: true
+      best_thresholds: true
+      fixed_parameters: false
+      test: false
+    timeseries:
+      - name: sine-base
+        <<: *mutations-base
+    parameters:
+      - name: anomaly_window_size
+        dtype: int
+        min: 10
+        max: 300
+      - name: exclusion_zone
+        dtype: float
+        min: 0.1
+        max: 1.0
+      - name: random_state
+        dtype: int
+        min: 0
+        max: 42
+  - name: STOMP_70b8896c6c27fce9c45c1273affc029f
+    study_override: true
+    algorithm: stomp
+    n_trials:
+      train: 300
+      validation: 80
+      test_model: 100
+      test_full_optimization: 300
+    start_from_snapshot:
+      study_name: STOMP_70b8896c6c27fce9c45c1273affc029f
+      train: true
+      best_thresholds: true
+      fixed_parameters: false
+      test: false
+    timeseries:
+      - name: sine-base
+        <<: *mutations-base
+    parameters:
+      - name: anomaly_window_size
+        dtype: int
+        min: 10
+        max: 300
+      - name: exclusion_zone
+        dtype: float
+        min: 0.1
+        max: 1.0
+      - name: random_state
+        dtype: int
+        min: 0
+        max: 42
+
+
+  # - name: S2G_d4aad3ab370a42d8e69c15a1e253332b
+  #   study_override: true
+  #   algorithm: series2graph
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: S2G_d4aad3ab370a42d8e69c15a1e253332b
+  #     train: true
+  #     best_thresholds: true
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: query_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 400
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: rate
+  #       dtype: int
+  #       min: 10
+  #       max: 200
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+  # - name: S2G_f4bbafc1e46bb00e3934ff1234018b8b
+  #   study_override: true
+  #   algorithm: series2graph
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: S2G_f4bbafc1e46bb00e3934ff1234018b8b
+  #     train: true
+  #     best_thresholds: true
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: query_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 400
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: rate
+  #       dtype: int
+  #       min: 10
+  #       max: 200
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+  # - name: S2G_0eec263f602e82f178532b671d36cecc
+  #   study_override: true
+  #   algorithm: series2graph
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: S2G_0eec263f602e82f178532b671d36cecc
+  #     train: true
+  #     best_thresholds: true
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: query_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 400
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: rate
+  #       dtype: int
+  #       min: 10
+  #       max: 200
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+  # - name: S2G_6a6b333dfc58da1f30b62bd2da9a942e
+  #   study_override: true
+  #   algorithm: series2graph
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: S2G_6a6b333dfc58da1f30b62bd2da9a942e
+  #     train: true
+  #     best_thresholds: true
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: query_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 400
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: rate
+  #       dtype: int
+  #       min: 10
+  #       max: 200
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+  # - name: S2G_c2d43f9a9a3bb3d558ed076e53472689
+  #   study_override: true
+  #   algorithm: series2graph
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: S2G_c2d43f9a9a3bb3d558ed076e53472689
+  #     train: true
+  #     best_thresholds: true
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: query_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 400
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: rate
+  #       dtype: int
+  #       min: 10
+  #       max: 200
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+  # - name: S2G_169b6b2d14f0c20f17248e97501c9d5f
+  #   study_override: true
+  #   algorithm: series2graph
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: S2G_169b6b2d14f0c20f17248e97501c9d5f
+  #     train: true
+  #     best_thresholds: true
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: query_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 400
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: rate
+  #       dtype: int
+  #       min: 10
+  #       max: 200
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+
+  # - name: S2G_011948559b53e0405a9e39c1f836b40f
+  #   study_override: true
+  #   algorithm: series2graph
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: S2G_011948559b53e0405a9e39c1f836b40f
+  #     train: true
+  #     best_thresholds: true
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: query_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 400
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: rate
+  #       dtype: int
+  #       min: 10
+  #       max: 200
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+  # - name: S2G_1f15fc0298d1366181df638aca881101
+  #   study_override: true
+  #   algorithm: series2graph
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: S2G_1f15fc0298d1366181df638aca881101
+  #     train: true
+  #     best_thresholds: true
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: query_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 400
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: rate
+  #       dtype: int
+  #       min: 10
+  #       max: 200
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+
+
+  # - name: Sub-LOF_4538699d8c4929a9ef747a9c86004f2a
+  #   study_override: true
+  #   algorithm: sub_lof
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: Sub-LOF_4538699d8c4929a9ef747a9c86004f2a
+  #     train: true
+  #     best_thresholds: true
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 150
+  #     - name: n_neighbors
+  #       dtype: int
+  #       min: 2
+  #       max: 100
+  #     - name: leaf_size
+  #       dtype: int
+  #       min: 10
+  #       max: 80
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+  # - name: Sub-LOF_0dab38b197df53cd5158aca42e39a7eb
+  #   study_override: true
+  #   algorithm: sub_lof
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: Sub-LOF_0dab38b197df53cd5158aca42e39a7eb
+  #     train: true
+  #     best_thresholds: true
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 150
+  #     - name: n_neighbors
+  #       dtype: int
+  #       min: 2
+  #       max: 100
+  #     - name: leaf_size
+  #       dtype: int
+  #       min: 10
+  #       max: 80
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+  # - name: Sub-LOF_c4b7341d80062ff63a63f30c1822348d
+  #   study_override: true
+  #   algorithm: sub_lof
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: Sub-LOF_c4b7341d80062ff63a63f30c1822348d
+  #     train: true
+  #     best_thresholds: true
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 150
+  #     - name: n_neighbors
+  #       dtype: int
+  #       min: 2
+  #       max: 100
+  #     - name: leaf_size
+  #       dtype: int
+  #       min: 10
+  #       max: 80
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+  # - name: Sub-LOF_1ab72588ff0b8bcb450efcee8fb02fa7
+  #   study_override: true
+  #   algorithm: sub_lof
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: Sub-LOF_1ab72588ff0b8bcb450efcee8fb02fa7
+  #     train: true
+  #     best_thresholds: true
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 150
+  #     - name: n_neighbors
+  #       dtype: int
+  #       min: 2
+  #       max: 100
+  #     - name: leaf_size
+  #       dtype: int
+  #       min: 10
+  #       max: 80
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+
+  # - name: STOMP_gamma=0.4
+  #   study_override: true
+  #   algorithm: stomp
+  #   gamma: 0.4
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: STOMP_gamma=0.4
+  #     train: true
+  #     best_thresholds: false
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: sine-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: anomaly_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: exclusion_zone
+  #       dtype: float
+  #       min: 0.1
+  #       max: 1.0
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+  # - name: STOMP_gamma=0.3
+  #   study_override: true
+  #   algorithm: stomp
+  #   gamma: 0.3
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: STOMP_gamma=0.3
+  #     train: true
+  #     best_thresholds: false
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: sine-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: anomaly_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: exclusion_zone
+  #       dtype: float
+  #       min: 0.1
+  #       max: 1.0
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+  # - name: STOMP_gamma=0.2
+  #   study_override: true
+  #   algorithm: stomp
+  #   gamma: 0.2
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: STOMP_gamma=0.2
+  #     train: true
+  #     best_thresholds: false
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: sine-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: anomaly_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: exclusion_zone
+  #       dtype: float
+  #       min: 0.1
+  #       max: 1.0
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+  # - name: STOMP_gamma=0.1
+  #   study_override: true
+  #   algorithm: stomp
+  #   gamma: 0.1
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: STOMP_gamma=0.1
+  #     train: true
+  #     best_thresholds: false
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: sine-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: anomaly_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: exclusion_zone
+  #       dtype: float
+  #       min: 0.1
+  #       max: 1.0
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+  # - name: STOMP_gamma=0.0
+  #   study_override: true
+  #   algorithm: stomp
+  #   gamma: 0.0
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: STOMP_gamma=0.0
+  #     train: true
+  #     best_thresholds: false
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: sine-base
+  #       <<: *mutations-base
+  #   parameters:
+  #     - name: anomaly_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: exclusion_zone
+  #       dtype: float
+  #       min: 0.1
+  #       max: 1.0
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+
+
+
+
+
+  # - name: DWT-MLEAD_final
+  #   study_override: true
+  #   algorithm: dwt-mlead
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: DWT-MLEAD_final
+  #     train: true
+  #     best_thresholds: false
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: sine-base
+  #       <<: *mutations-base
+  #     # - name: ecg-base
+  #     #   <<: *mutations-base
+  #     # - name: random-walk-base
+  #     #   <<: *mutations-no-freq
+  #     # - name: cylinder-bell-funnel-base
+  #     #   <<: *mutations-no-freq
+  #   parameters:
+  #     - name: start_level
+  #       dtype: int
+  #       min: 1
+  #       max: 20
+  #     - name: quantile_epsilon
+  #       dtype: float
+  #       min: 0.0
+  #       max: 1.0
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+
+  # - name: S2G_final
+  #   study_override: true
+  #   algorithm: series2graph
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: S2G_final
+  #     train: true
+  #     best_thresholds: false
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: sine-base
+  #       <<: *mutations-base
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #     - name: random-walk-base
+  #       <<: *mutations-no-freq
+  #     - name: cylinder-bell-funnel-base
+  #       <<: *mutations-no-freq
+  #   parameters:
+  #     - name: query_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 400
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: rate
+  #       dtype: int
+  #       min: 10
+  #       max: 200
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+
+  # - name: Subsequence-IF_final
+  #   study_override: true
+  #   algorithm: sub_if
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: Subsequence-IF_final
+  #     train: true
+  #     best_thresholds: false
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     - name: sine-base
+  #       <<: *mutations-base
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #     - name: random-walk-base
+  #       <<: *mutations-no-freq
+  #     - name: cylinder-bell-funnel-base
+  #       <<: *mutations-no-freq
+  #   parameters:
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 200
+  #     - name: n_trees
+  #       dtype: int
+  #       min: 5
+  #       max: 300
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+
+  # - name: Sub-LOF_final
+  #   study_override: true
+  #   algorithm: sub_lof
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: Sub-LOF_final
+  #     train: true
+  #     best_thresholds: false
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     # - name: sine-base
+  #     #   <<: *mutations-base
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #     - name: random-walk-base
+  #       <<: *mutations-no-freq
+  #     - name: cylinder-bell-funnel-base
+  #       <<: *mutations-no-freq
+  #   parameters:
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 150
+  #     - name: n_neighbors
+  #       dtype: int
+  #       min: 2
+  #       max: 100
+  #     - name: leaf_size
+  #       dtype: int
+  #       min: 10
+  #       max: 80
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+
+  # - name: STOMP_final
+  #   study_override: true
+  #   algorithm: stomp
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: STOMP_final
+  #     train: true
+  #     best_thresholds: false
+  #     fixed_parameters: false
+  #     test: false
+  #   timeseries:
+  #     # - name: sine-base
+  #     #   <<: *mutations-base
+  #     # - name: ecg-base
+  #     #   <<: *mutations-base
+  #     - name: random-walk-base
+  #       <<: *mutations-no-freq
+  #     # - name: cylinder-bell-funnel-base
+  #     #   <<: *mutations-no-freq
+  #   parameters:
+  #     - name: anomaly_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: exclusion_zone
+  #       dtype: float
+  #       min: 0.1
+  #       max: 1.0
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+
+  # - name: Donut_final
+  #   study_override: false
+  #   algorithm: donut
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: Donut
+  #     train: true
+  #     validation: false
+  #     test: false
+  #   timeseries:
+  #     - name: sine-base
+  #       <<: *mutations-base
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #     - name: random-walk-base
+  #       <<: *mutations-no-freq
+  #     - name: cylinder-bell-funnel-base
+  #       <<: *mutations-no-freq
+  #   parameters:
+  #     - name: window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 200
+  #     - name: latent_size
+  #       dtype: int
+  #       min: 2
+  #       max: 20
+  #     - name: regularization
+  #       dtype: float
+  #       min: 0.0001
+  #       max: 0.01
+  #     - name: linear_hidden_size
+  #       dtype: int
+  #       min: 50
+  #       max: 200
+  #     - name: epochs
+  #       dtype: int
+  #       min: 256
+  #       max: 500
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+
+
+  # ERROR
+  # - name: GrammarViz
+  #   study_override: false
+  #   algorithm: grammarviz3
+  #   n_trials:
+  #     train: 300
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   timeseries:
+  #     - name: sine-base
+  #       <<: *mutations-base
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #     - name: random-walk-base
+  #       <<: *mutations-no-freq
+  #     - name: cylinder-bell-funnel-base
+  #       <<: *mutations-no-freq
+  #     - name: polynomial-base
+  #       <<: *mutations-no-freq
+  #   parameters:
+  #     - name: anomaly_window_size
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: paa_transform_size
+  #       dtype: int
+  #       min: 1
+  #       max: 10
+  #     - name: alphabet_size
+  #       dtype: int
+  #       min: 1
+  #       max: 10
+  #     - name: normalization_threshold
+  #       dtype: float
+  #       min: 0.001
+  #       max: 0.1
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+
+  # - name: DBStream
+  #   study_override: false
+  #   algorithm: dbstream
+  #   n_trials:
+  #     train: 300
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   timeseries:
+  #     - name: sine-base
+  #       <<: *mutations-base
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #     - name: random-walk-base
+  #       <<: *mutations-no-freq
+  #     - name: cylinder-bell-funnel-base
+  #       <<: *mutations-no-freq
+  #     - name: polynomial-base
+  #       <<: *mutations-no-freq
+  #   parameters:
+  #     - name: window_size
+  #       dtype: int
+  #       min: 5
+  #       max: 200
+  #     - name: radius
+  #       dtype: float
+  #       min: 0.01
+  #       max: 0.5
+  #     - name: lambda
+  #       dtype: float
+  #       min: 0.0001
+  #       max: 0.1
+  #     - name: n_clusters
+  #       dtype: int
+  #       min: 0
+  #       max: 150
+  #     - name: alpha
+  #       dtype: float
+  #       min: 0.01
+  #       max: 0.5
+  #     - name: min_weight
+  #       dtype: float
+  #       min: 0.0
+  #       max: 0.5
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+
+  # - name: iForest
+  #   study_override: false
+  #   algorithm: iforest
+  #   n_trials:
+  #     train: 100
+  #     test_model: 80
+  #     test_full_optimization: 100
+  #   timeseries:
+  #     - name: sine-base
+  #       <<: *mutations-base
+  #     - name: ecg-base
+  #       <<: *mutations-base
+  #     - name: random-walk-base
+  #       <<: *mutations-no-freq
+  #     - name: cylinder-bell-funnel-base
+  #       <<: *mutations-no-freq
+  #     - name: polynomial-base
+  #       <<: *mutations-no-freq
+  #   parameters:
+  #     - name: n_trees
+  #       dtype: int
+  #       min: 10
+  #       max: 300
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42

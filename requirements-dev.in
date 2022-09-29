@@ -7,3 +7,7 @@ black
 pylint
 pytest
 tox
+jupyterlab
+ipykernel
+seaborn
+graphviz

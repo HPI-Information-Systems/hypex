@@ -12,9 +12,8 @@ def main(environment: str, config_path: str):
         cluster_config = hypaad.REMOTE_CLUSTER_CONFIG
     else:
         raise ValueError(f"Unknown environment: {environment}")
-    hypaad.HypaadExecutor.execute(
-        cluster_config=cluster_config, config_path=config_path
-    )
+
+    hypaad.Main(cluster_config=cluster_config).run(config_path=config_path)
 
 
 def parse_args():

@@ -3,29 +3,57 @@ import logging
 import subprocess
 import typing as t
 from pathlib import Path
+from time import sleep
 
-import docker
 import numpy as np
 from durations import Duration
+from requests.exceptions import ReadTimeout
 
-__all__ = ["AlgorithmExecutor"]
+import docker
+import hypaad
+
+__all__ = ["AlgorithmExecutor", "AlgorithmRuntimeException"]
 
 DATASET_MOUNT_PATH = "/data"
 RESULTS_MOUNT_PATH = "/results"
 SCORES_FILE_NAME = "docker-algorithm-scores.csv"
 MODEL_FILE_NAME = "model.pkl"
 
+LAUNCH_RETRY_LIMIT = 3
+DOCKER_RETRY_LIMIT = 3
+
+
+class AlgorithmRuntimeException(Exception):
+    pass
+
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        return super(NumpyEncoder, self).default(obj)
+
 
 class AlgorithmExecutor:
+    client = docker.from_env(timeout=None)
+
     def __init__(
         self,
         image_name: str,
+        default_params: t.Dict[str, t.Any],
+        get_timeeval_params: t.Callable[[t.Any], t.List[t.Dict[str, t.Any]]],
+        parameter_space: "hypaad.MultidimensionalParameterDistribution" = None,
         postprocess: t.Optional[
             t.Callable[[np.array, t.Dict[str, t.Any]], np.array]
         ] = None,
     ) -> None:
         self._logger = logging.getLogger(self.__class__.__name__)
         self.image_name = image_name
+        self.default_params = default_params
+        self.get_timeeval_params = get_timeeval_params
+        self.parameter_space = parameter_space
         self.postprocess = postprocess
 
     @classmethod
@@ -42,7 +70,6 @@ class AlgorithmExecutor:
         return uid
 
     def _start_container(self, dataset_path: str, args: t.Dict[str, t.Any]):
-        client = docker.from_env()
         _dataset_path = Path(dataset_path)
 
         algorithm_args = {
@@ -64,49 +91,90 @@ class AlgorithmExecutor:
 
         uid = AlgorithmExecutor._get_uid()
 
-        return client.containers.run(
-            image=self.image_name,
-            command=f"execute-algorithm '{json.dumps(algorithm_args)}'",
-            volumes={
-                str(Path(dataset_path).parent.absolute()): {
-                    "bind": DATASET_MOUNT_PATH,
-                    "mode": "ro",
-                },
-                str(self._get_results_path(args=args).absolute()): {
-                    "bind": RESULTS_MOUNT_PATH,
-                    "mode": "rw",
-                },
-            },
-            environment={"LOCAL_UID": uid},
-            detach=True,
+        launch_retry_count = 0
+        error: docker.errors.ContainerError = None
+        while launch_retry_count < LAUNCH_RETRY_LIMIT:
+            launch_retry_count += 1
+            try:
+                self.client.containers.run(
+                    image=self.image_name,
+                    command=f"execute-algorithm '{json.dumps(algorithm_args, cls=NumpyEncoder)}'",
+                    volumes={
+                        str(Path(dataset_path).parent.absolute()): {
+                            "bind": DATASET_MOUNT_PATH,
+                            "mode": "ro",
+                        },
+                        str(self._get_results_path(args=args).absolute()): {
+                            "bind": RESULTS_MOUNT_PATH,
+                            "mode": "rw",
+                        },
+                    },
+                    environment={"LOCAL_UID": uid},
+                    nano_cpus=int(0.9 * 1e9),  # 0.9 CPU
+                    stderr=True,
+                    detach=False,
+                    remove=True,
+                )
+                return
+            except docker.errors.ContainerError as e:
+                self._logger.error(
+                    "Docker container launch failed with error %s", e
+                )
+                error = e
+                sleep(30)
+
+        self._logger.info("###############################\n")
+        self._logger.error(
+            "Docker algorithm failed with status code %d", error.exit_status
         )
+        self._logger.info("#### Docker container logs ####")
+        self._logger.info(error.stderr)
 
-    def _wait(
-        self, container: "docker.models.Container", args: t.Dict[str, t.Any]
-    ):
-        timeout = Duration(args.get("timeout", "10 minutes"))
-        try:
-            result = container.wait(timeout=timeout.to_seconds())
-        # pylint: disable=broad-except
-        except Exception as e:
-            self._logger.error(
-                "Execution of Docker container failed with error %s", e
-            )
-        finally:
-            self._logger.info("\n#### Docker container logs ####")
-            self._logger.info(container.logs().decode("utf-8"))
-            self._logger.info("###############################\n")
-            container.stop()
+        raise AlgorithmRuntimeException(error)
 
-        status_code = result["StatusCode"]
+    # def _wait(
+    #     self, container: "docker.models.Container", args: t.Dict[str, t.Any]
+    # ):
+    #     @hypaad.timeout(seconds=60)
+    #     def _get_logs():
+    #         return container.logs().decode("utf-8")
 
-        if status_code != 0:
-            self._logger.error(
-                "Docker algorithm failed with status code %d", status_code
-            )
-            raise ValueError(
-                f"Docker container returned non-zero status code {status_code}."
-            )
+    #     result = None
+
+    #     # timeout = Duration(args.get("timeout", "10 minutes"))
+    #     retry_count = 0
+    #     while retry_count < DOCKER_RETRY_LIMIT:
+    #         retry_count += 1
+    #         try:
+    #             result = container.wait()
+    #         # pylint: disable=broad-except
+    #         except Exception as e:
+    #             self._logger.error(
+    #                 "Execution of Docker container failed with error %s [retry_count=%d]", e, retry_count
+    #             )
+    #             sleep(10)
+
+    #     logs = _get_logs()
+    #     self._logger.info("###############################\n")
+    #     self._logger.info("Now stopping the container...")
+    #     container.stop()
+    #     self._logger.info("Now removing the container...")
+    #     container.remove()
+    #     self._logger.info("Container cleanup completed")
+
+    #     status_code = result["StatusCode"] if result is not None else 1
+    #     if status_code != 0:
+    #         self._logger.error(
+    #             "Docker algorithm failed with status code %d", status_code
+    #         )
+    #         self._logger.info("#### Docker container logs ####")
+    #         self._logger.info(logs)
+    #         raise AlgorithmRuntimeException(
+    #             f"Docker container returned non-zero status code {status_code}."
+    #         )
+    #     self._logger.info(
+    #         "Docker algorithm completed with status code %d", status_code
+    #     )
 
     def _read_results(self, args: t.Dict[str, t.Any]) -> np.ndarray:
         return np.genfromtxt(
@@ -124,8 +192,8 @@ class AlgorithmExecutor:
         return scores
 
     def execute(self, dataset_path: str, args: t.Dict[str, t.Any]) -> np.array:
-        container = self._start_container(dataset_path=dataset_path, args=args)
-        self._wait(container=container, args=args)
+        self._start_container(dataset_path=dataset_path, args=args)
+        # self._wait(container=container, args=args)
         results = self._read_results(args=args)
 
         return self._postprocess(results, args)

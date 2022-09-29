@@ -34,7 +34,7 @@ class Config:
 
         studies = []
         for s in config["studies"]:
-            studies.append(Study.from_config(s))
+            studies.extend(Study.studies_from_config(s))
         cls._logger.info(
             "Found %d studies %s",
             len(studies),
