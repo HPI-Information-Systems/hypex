@@ -34,7 +34,7 @@ except ImportError:
     from sphinx import apidoc
 
 output_dir = os.path.join(__location__, "api")
-module_dir = os.path.join(__location__, "../src/hypaad")
+module_dir = os.path.join(__location__, "../src/hypex")
 try:
     shutil.rmtree(output_dir)
 except FileNotFoundError:
@@ -87,7 +87,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "hypaad"
+project = "hypex"
 copyright = "2022, Mats Pörschke"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -99,7 +99,7 @@ copyright = "2022, Mats Pörschke"
 # If you don’t need the separation provided between version and release,
 # just set them both to the same value.
 try:
-    from hypaad import __version__ as version
+    from hypex import __version__ as version
 except ImportError:
     version = ""
 
@@ -229,7 +229,7 @@ html_static_path = ["_static"]
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "hypaad-doc"
+htmlhelp_basename = "hypex-doc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -246,7 +246,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "user_guide.tex", "hypaad Documentation", "Mats Pörschke", "manual")
+    ("index", "user_guide.tex", "HYPEX Documentation", "Mats Pörschke and Sebastian Schmidl", "manual")
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

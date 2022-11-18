@@ -2,7 +2,7 @@
 # Ubuntu 20.04 on amd64 systems (May 2022)
 FROM ubuntu:21.10
 
-WORKDIR /usr/src/hypaad
+WORKDIR /usr/src/hypex
 
 RUN apt update -qq
 RUN apt install -y software-properties-common dirmngr

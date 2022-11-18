@@ -1,21 +1,21 @@
 VENV_NAME?=.venv
 PYTHON=${VENV_NAME}/bin/python3
-PACKAGE_DIR=src/hypaad
+PACKAGE_DIR=src/hypex
 
 cluster:
 	rm -r .local && mkdir .local
 	docker compose down -v --remove-orphans
 	docker compose rm
-	docker build --ssh default . -t hypaad-controller -f Dockerfile.controller
-	docker build --ssh default . -t hypaad-node -f Dockerfile.node
+	docker build --ssh default . -t hypex-controller -f Dockerfile.controller
+	docker build --ssh default . -t hypex-node -f Dockerfile.node
 	docker-compose up --build
 
 run:
 	make package
 	make push-images
-	docker exec hypaad_controller /bin/sh -c "ssh-keyscan node-0 >> ~/.ssh/known_hosts"
-	docker exec hypaad_controller /bin/sh -c "ssh-keyscan node-1 >> ~/.ssh/known_hosts"
-	docker exec hypaad_controller /bin/sh -c "python3 ${PACKAGE_DIR} --config sanity-check.yaml"
+	docker exec hypex_controller /bin/sh -c "ssh-keyscan node-0 >> ~/.ssh/known_hosts"
+	docker exec hypex_controller /bin/sh -c "ssh-keyscan node-1 >> ~/.ssh/known_hosts"
+	docker exec hypex_controller /bin/sh -c "python3 ${PACKAGE_DIR} --config sanity-check.yaml"
 
 run-remote:
 	make package
@@ -25,11 +25,11 @@ logs:
 	docker compose logs -f
 
 run-it:
-	docker exec -it hypaad_controller /bin/sh
+	docker exec -it hypex_controller /bin/sh
 run-it0:
-	docker exec -it hypaad_node-0 /bin/sh
+	docker exec -it hypex_node-0 /bin/sh
 run-it1:
-	docker exec -it hypaad_node-1 /bin/sh
+	docker exec -it hypex_node-1 /bin/sh
 
 push-images:
 	docker image tag sopedu:5000/akita/series2graph localhost:5000/akita/series2graph

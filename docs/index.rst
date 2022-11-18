@@ -1,8 +1,8 @@
-======
-hypaad
-======
+=====
+HYPEX
+=====
 
-This is the documentation of **hypaad**.
+This is the documentation of **hypex**.
 
 .. note::
 

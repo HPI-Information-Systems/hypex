@@ -1,11 +1,11 @@
 version: '3.5'
 services:
   controller:
-    container_name: hypaad_controller
-    image: hypaad-controller
+    container_name: hypex_controller
+    image: hypex-controller
     tty: true
     volumes:
-      - .:/usr/src/hypaad
+      - .:/usr/src/hypex
 
   sopedu:
     image: registry:2
@@ -13,8 +13,8 @@ services:
       - 5000:5000
 
   node-0:
-    container_name: hypaad_node-0
-    image: hypaad-node
+    container_name: hypex_node-0
+    image: hypex-node
     privileged: true
     ports:
       - 6379:6379 # Redis
@@ -24,9 +24,9 @@ services:
       - .local/node-0/:/home/admin/:rw
 
   node-1:
-    container_name: hypaad_node-1
+    container_name: hypex_node-1
     privileged: true
-    image: hypaad-node
+    image: hypex-node
     ports:
       - 34443:34443
     volumes:
