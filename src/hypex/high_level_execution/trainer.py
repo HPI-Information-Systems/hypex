@@ -17,9 +17,7 @@ class Trainer(BaseRunner):
 
         def __add__(self, other: "Trainer.PartialResult"):
             if not isinstance(other, self.__class__):
-                raise ValueError(
-                    f"Cannot add {other.__class__} to PartialResult"
-                )
+                raise ValueError(f"Cannot add {other.__class__} to PartialResult")
             trial_results = self.trial_results
             trial_results.extend(other.trial_results)
             return Trainer.PartialResult(trial_results=trial_results)
@@ -103,9 +101,7 @@ class Trainer(BaseRunner):
     def run(
         self,
         all_timeseries_names: t.Dict[str, t.List[str]],
-        results_data_generation: t.Dict[
-            str, "hypex.DataGenerationModule.Result"
-        ],
+        results_data_generation: t.Dict[str, "hypex.DataGenerationModule.Result"],
         study: hypex.Study,
         score_variable: str,
     ) -> t.Dict[str, "hypex.CSLModule.Result"]:

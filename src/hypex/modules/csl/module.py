@@ -26,9 +26,7 @@ class CSLModule(BaseModule):
 
     @dataclass
     class Result(BaseResult):
-        csl_candidates: t.Dict[
-            t.Tuple[float, float], "hypex.NonLinearPC.Result"
-        ]
+        csl_candidates: t.Dict[t.Tuple[float, float], "hypex.NonLinearPC.Result"]
         csl_data: pd.DataFrame
         trial_results: pd.DataFrame
         applied_mutations: t.Dict[str, t.Dict[str, str]]
@@ -42,9 +40,7 @@ class CSLModule(BaseModule):
                 path=output_dir / "timeseries_mutations.json"
             )
 
-            trial_results = cls._load_dataframe(
-                path=output_dir / "trial_results.csv"
-            )
+            trial_results = cls._load_dataframe(path=output_dir / "trial_results.csv")
 
             csl_data = cls._load_dataframe(path=output_dir / "csl_data.csv")
 
@@ -67,9 +63,7 @@ class CSLModule(BaseModule):
                 except pd.errors.EmptyDataError:
                     graph_edges = pd.DataFrame()
 
-                csl_candidates[
-                    (float(alpha), float(beta))
-                ] = NonLinearPC.Result(
+                csl_candidates[(float(alpha), float(beta))] = NonLinearPC.Result(
                     parameter_model=hypex.ParameterModel.load(
                         path_parameter_model,
                     ),
@@ -112,12 +106,10 @@ class CSLModule(BaseModule):
                     "alpha": alpha,
                     "beta": beta,
                     "path_graph_edges": str(
-                        output_dir_graph_edges
-                        / f"alpha={alpha}_beta={beta}.csv"
+                        output_dir_graph_edges / f"alpha={alpha}_beta={beta}.csv"
                     ),
                     "path_parameter_model": str(
-                        output_dir_param_models
-                        / f"alpha={alpha}_beta={beta}.pickle"
+                        output_dir_param_models / f"alpha={alpha}_beta={beta}.pickle"
                     ),
                 }
                 for alpha, beta in self.csl_candidates.keys()
@@ -164,16 +156,13 @@ class CSLModule(BaseModule):
         )
         params_df = pd.json_normalize(
             trial_results["params"].map(
-                lambda x: json.loads(x.replace("'", '"'))
-                if type(x) == str
-                else x
+                lambda x: json.loads(x.replace("'", '"')) if type(x) == str else x
             )
         )
         mutations_df = pd.json_normalize(
             trial_results.timeseries.map(
                 lambda x: {
-                    entry["name"]: entry["value"]
-                    for entry in applied_mutations[x]
+                    entry["name"]: entry["value"] for entry in applied_mutations[x]
                 }
             )
         )
@@ -237,9 +226,7 @@ class CSLModule(BaseModule):
 
         ts_names = data.timeseries.unique()
         quantiles = {
-            ts_name: get_thresh(
-                data[data.timeseries == ts_name][score_variable]
-            )
+            ts_name: get_thresh(data[data.timeseries == ts_name][score_variable])
             for ts_name in ts_names
         }
 
@@ -299,14 +286,7 @@ class CSLModule(BaseModule):
             data=data_filtered, score_variable=score_variable
         )
         scores = sorted(
-            list(
-                set(
-                    [
-                        math.floor(e.score * 100) / 100.0
-                        for e in edge_data.values()
-                    ]
-                )
-            ),
+            list(set([math.floor(e.score * 100) / 100.0 for e in edge_data.values()])),
             reverse=True,
         )
 
@@ -330,9 +310,7 @@ class CSLModule(BaseModule):
                 self._logger.info(
                     "Running CSL with alpha: %f and beta: %f", alpha, beta
                 )
-                candidates[(alpha, beta)] = NonLinearPC(
-                    edge_data=edge_data
-                ).run(
+                candidates[(alpha, beta)] = NonLinearPC(edge_data=edge_data).run(
                     data=data_filtered,
                     data_gen_vars=data_gen_vars,
                     alpha=alpha,

@@ -74,13 +74,9 @@ class OptunaStorage:
     def get_storage_backend(self):
         if self.storage_backend is None:
             if self.type == OptunaStorageType.REDIS:
-                self.storage_backend = optuna.storages.RedisStorage(
-                    url=self.get_uri()
-                )
+                self.storage_backend = optuna.storages.RedisStorage(url=self.get_uri())
             elif self.type == OptunaStorageType.MYSQL:
-                self.storage_backend = optuna.storages.RDBStorage(
-                    url=self.get_uri()
-                )
+                self.storage_backend = optuna.storages.RDBStorage(url=self.get_uri())
             else:
                 raise ValueError(f"Unknown storage type: {self.type}")
         return self.storage_backend

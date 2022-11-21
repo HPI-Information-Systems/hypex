@@ -1,7 +1,7 @@
 import logging
-from math import gamma
 import typing as t
 from dataclasses import dataclass
+from math import gamma
 from uuid import uuid4
 
 import optuna
@@ -113,9 +113,7 @@ class ParameterDistribution:
         return generator.run(**kwargs)
 
     def next_guess(self, trial: optuna.Trial) -> t.Dict[str, t.Any]:
-        self._logger.info(
-            "Suggesting %s with dtype %s ...", self.name, self.dtype
-        )
+        self._logger.info("Suggesting %s with dtype %s ...", self.name, self.dtype)
         if self.dtype == "int":
             return trial.suggest_int(
                 name=self.name, low=self.min_value, high=self.max_value
@@ -125,9 +123,7 @@ class ParameterDistribution:
                 name=self.name, low=self.min_value, high=self.max_value
             )
         elif self.dtype == "category":
-            return trial.suggest_categorical(
-                name=self.name, choices=self.values
-            )
+            return trial.suggest_categorical(name=self.name, choices=self.values)
         else:
             raise ValueError(f"DType {self.dtype} is currently not supported")
 
@@ -149,9 +145,7 @@ class MultidimensionalParameterDistribution:
             guess[param.name] = param.next_guess(trial)
         return guess
 
-    def random_guess(
-        self, generator: "hypex.ValueGenerator"
-    ) -> t.Dict[str, t.Any]:
+    def random_guess(self, generator: "hypex.ValueGenerator") -> t.Dict[str, t.Any]:
         return {
             param.name: param.random_guess(generator=generator)
             for param in self.parameter_distributions
@@ -242,9 +236,7 @@ class Study:
                     name=name,
                     study_override=config.get("study_override", False),
                     algorithm=config.get("algorithm"),
-                    n_trials=NumTrials.from_config(
-                        config=config.get("n_trials")
-                    ),
+                    n_trials=NumTrials.from_config(config=config.get("n_trials")),
                     timeseries=timeseries,
                     parameters=MultidimensionalParameterDistribution.from_config(
                         config=config.get("parameters")

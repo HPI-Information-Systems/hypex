@@ -18,9 +18,7 @@ def _post_donut(scores: np.ndarray, args: dict) -> np.ndarray:
 def get_timeeval_params(
     gutentag_config: t.Dict[str, t.Any]
 ) -> t.List[t.Dict[str, t.Any]]:
-    window_size = math.ceil(
-        get_dataset_period_size(gutentag_config, default=120)
-    )
+    window_size = math.ceil(get_dataset_period_size(gutentag_config, default=120))
     return [
         {
             "window_size": window_size,

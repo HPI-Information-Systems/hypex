@@ -9,9 +9,7 @@ from .study import Study
 
 __all__ = ["Config"]
 
-SCHEMA_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "schema.yml"
-)
+SCHEMA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "schema.yml")
 
 
 class Config:

@@ -34,10 +34,7 @@ class Main:
         @classmethod
         def load(cls, study_name: str, base_dir: Path) -> "Main.DatasetSplits":
             data = cls._load_dict(
-                path=base_dir
-                / study_name
-                / "data_generation"
-                / "dataset_splits.json"
+                path=base_dir / study_name / "data_generation" / "dataset_splits.json"
             )
             return cls(
                 train=data.get("train"),
@@ -59,9 +56,7 @@ class Main:
         self.cluster_config = cluster_config
         self.seed = seed
 
-    def _compute_with_progress(
-        self, client: dask.distributed.Client, items: t.Any
-    ):
+    def _compute_with_progress(self, client: dask.distributed.Client, items: t.Any):
         _futures = client.compute(items)
         dask.distributed.progress(_futures)
         return client.gather(_futures)
@@ -90,9 +85,7 @@ class Main:
         self._logger.info("Saving %s results to local disk.", task_group)
         for study_name, result in computed_results.items():
             result.save(study_name, results_dir)
-        self._logger.info(
-            "Completed saving %s results to local disk.", task_group
-        )
+        self._logger.info("Completed saving %s results to local disk.", task_group)
 
         return computed_results
 
@@ -117,9 +110,7 @@ class Main:
         studies = hypex.Config.from_dict(config=raw_config)
 
         results_dir = Path(results_dir)
-        self._logger.info(
-            "Creating results directory at %s", results_dir.absolute()
-        )
+        self._logger.info("Creating results directory at %s", results_dir.absolute())
         results_dir.mkdir(exist_ok=True)
 
         existing_studies_without_override = []
@@ -150,9 +141,7 @@ class Main:
             generator = hypex.ValueGenerator(seed=self.seed)
 
             dataset_splits: t.Dict[str, Main.DatasetSplits] = {}
-            results_data_generation: t.Dict[
-                str, hypex.DataGenerationModule.Result
-            ] = {}
+            results_data_generation: t.Dict[str, hypex.DataGenerationModule.Result] = {}
             results_train: t.Dict[str, hypex.CSLModule.Result] = {}
 
             for study in studies:
@@ -177,9 +166,9 @@ class Main:
                         study_name=study.name, base_dir=results_dir
                     )
                 else:
-                    results_data_generation[
-                        study.name
-                    ] = hypex.DataGenerationModule(seed=self.seed).run(
+                    results_data_generation[study.name] = hypex.DataGenerationModule(
+                        seed=self.seed
+                    ).run(
                         cluster=cluster,
                         output_dir=data_dir / study.name,
                         base_data_config=raw_config,
@@ -190,15 +179,8 @@ class Main:
                         study_name=study.name, base_output_dir=results_dir
                     )
 
-                    (
-                        tmp_timeseries_names,
-                        timeseries_names_test,
-                    ) = train_test_split(
-                        list(
-                            results_data_generation[
-                                study.name
-                            ].data_paths.keys()
-                        ),
+                    (tmp_timeseries_names, timeseries_names_test,) = train_test_split(
+                        list(results_data_generation[study.name].data_paths.keys()),
                         test_size=DATASET_TEST_SIZE,
                         random_state=self.seed,
                     )
@@ -272,9 +254,7 @@ class Main:
                     trainer = hypex.Trainer(seed=self.seed, storage=storage)
                     optimization_module, _input_data = trainer.prepare_partial(
                         timeseries_names=dataset_splits[study.name].train,
-                        result_data_generation=results_data_generation[
-                            study.name
-                        ],
+                        result_data_generation=results_data_generation[study.name],
                         study=study,
                     )
 
@@ -315,9 +295,7 @@ class Main:
                         input_data=_input_data,
                         optimization_module=optimization_module,
                         partial_results=partial_results,
-                        result_data_generation=results_data_generation[
-                            study.name
-                        ],
+                        result_data_generation=results_data_generation[study.name],
                         timeseries_names=dataset_splits[study.name].train,
                         score_variable=score_variable,
                     )
@@ -378,9 +356,7 @@ class Main:
                     and study.start_from_snapshot.fixed_parameters
                 ):
                     name = f"{study.start_from_snapshot.study_name}.{study.timeseries.name}"
-                    results_fixed_parameters[
-                        study.name
-                    ] = hypex.Validator.Result.load(
+                    results_fixed_parameters[study.name] = hypex.Validator.Result.load(
                         study_name=name,
                         base_dir=results_dir,
                     )
@@ -416,9 +392,7 @@ class Main:
                     and study.start_from_snapshot.test
                 ):
                     name = f"{study.start_from_snapshot.study_name}.{study.timeseries.name}"
-                    results_evaluation[
-                        study.name
-                    ] = hypex.Evaluator.Result.load(
+                    results_evaluation[study.name] = hypex.Evaluator.Result.load(
                         study_name=name,
                         base_dir=results_dir,
                     )

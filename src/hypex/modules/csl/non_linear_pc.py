@@ -26,9 +26,7 @@ class NonLinearPC:
         graph_edges: pd.DataFrame
 
         def get_graph_hash(self):
-            return nx.weisfeiler_lehman_graph_hash(
-                self.parameter_model.pruned_graph
-            )
+            return nx.weisfeiler_lehman_graph_hash(self.parameter_model.pruned_graph)
 
     def __init__(
         self,
@@ -58,9 +56,7 @@ class NonLinearPC:
         nodes = filter(lambda x: x != score_variable, list(data.columns))
         df, scores = cls._split_data_and_score(data, score_variable)
         for (node_i, node_j) in permutations(nodes, 2):
-            edge_data[
-                (node_i, node_j)
-            ] = NonLinearIndependenceTest.independence_test(
+            edge_data[(node_i, node_j)] = NonLinearIndependenceTest.independence_test(
                 df, node_i, node_j, scores
             )
         return edge_data
@@ -81,9 +77,7 @@ class NonLinearPC:
         node_mapping = {idx: col for idx, col in enumerate(nodes)}
         g = nx.relabel_nodes(g, mapping=node_mapping)
 
-        sep_set = {
-            node_j: {node_i: set() for node_i in nodes} for node_j in nodes
-        }
+        sep_set = {node_j: {node_i: set() for node_i in nodes} for node_j in nodes}
 
         def method_stable(kwargs):
             return ("method" in kwargs) and kwargs["method"] == "stable"
@@ -116,20 +110,15 @@ class NonLinearPC:
                                     node_j,
                                 )
                             else:
-                                retval = (
-                                    NonLinearIndependenceTest.independence_test(
-                                        df, node_i, node_j, scores
-                                    )
+                                retval = NonLinearIndependenceTest.independence_test(
+                                    df, node_i, node_j, scores
                                 )
                                 self.edge_data[(node_i, node_j)] = retval
                             is_independend = retval.score < alpha
                         else:
 
                             if not all(
-                                [
-                                    node_j in g.neighbors(node_k)
-                                    for node_k in nodes_k
-                                ]
+                                [node_j in g.neighbors(node_k) for node_k in nodes_k]
                             ):
                                 self._logger.debug(
                                     "Skipping conditional independence test of %s -> %s | %s as at least one node_k does not have an edge with %s",
@@ -141,8 +130,10 @@ class NonLinearPC:
                                 continue
 
                             cols_k = set(nodes_k)
-                            retval = NonLinearIndependenceTest.conditional_independence_test(
-                                df, node_i, node_j, cols_k, scores
+                            retval = (
+                                NonLinearIndependenceTest.conditional_independence_test(
+                                    df, node_i, node_j, cols_k, scores
+                                )
                             )
                             is_independend = False
                             is_independend = retval.score > beta
@@ -361,9 +352,7 @@ class NonLinearPC:
             if node_to in fixed_predictor_vars:
                 pruned_skeleton.remove_edge(node_from, node_to)
 
-        nx_graph = self.estimate_cpdag(
-            skel_graph=pruned_skeleton, sep_set=sep_set
-        )
+        nx_graph = self.estimate_cpdag(skel_graph=pruned_skeleton, sep_set=sep_set)
 
         parameter_model = hypex.ParameterModel.create_from(
             graph=nx_graph,

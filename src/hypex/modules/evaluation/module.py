@@ -175,7 +175,8 @@ class EvaluationModule(BaseModule):
                 return None
 
             def func(
-                timeseries_name: str, **params,
+                timeseries_name: str,
+                **params,
             ) -> t.Callable[[t.Dict[str, t.Any]], t.Dict[str, t.Any]]:
                 data_params = {
                     entry["name"]: entry["value"]
@@ -190,10 +191,8 @@ class EvaluationModule(BaseModule):
 
             return func
 
-        postprocess_parameter_guess = (
-            create_postprocess_parameter_guess_func(
-                parameter_model=parameter_model
-            )
+        postprocess_parameter_guess = create_postprocess_parameter_guess_func(
+            parameter_model=parameter_model
         )
 
         return hypex.OptimizationModule(

@@ -23,9 +23,7 @@ class DataGenerator:
         gutentag_config: t.Dict[str, t.Any],
         output_dir: Path,
     ) -> t.Tuple[t.Dict[str, t.Any], str]:
-        self._logger.info(
-            "Now generating data for configuration %s", gutentag_config
-        )
+        self._logger.info("Now generating data for configuration %s", gutentag_config)
 
         data_gen = GutenTAG(seed=self.seed, n_jobs=1)
         print("gutentag_config:", gutentag_config)
@@ -53,9 +51,7 @@ class DataGenerator:
                 base_timeseries_config=base_timeseries_config,
                 generator=generator,
             )
-            self._generate(
-                gutentag_config=gutentag_config, output_dir=output_dir
-            )
+            self._generate(gutentag_config=gutentag_config, output_dir=output_dir)
             applied_mutations[ts_name] = _applied_mutations
             gutentag_configs[ts_name] = gutentag_config
         return applied_mutations, gutentag_configs

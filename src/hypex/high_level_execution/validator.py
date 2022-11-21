@@ -58,9 +58,7 @@ class Validator(BaseRunner):
             )
 
             canditate_trial_results = {
-                (entry["alpha"], entry["beta"]): cls._load_dataframe(
-                    path=entry["path"]
-                )
+                (entry["alpha"], entry["beta"]): cls._load_dataframe(path=entry["path"])
                 for entry in metadata["paths"]
             }
 
@@ -183,9 +181,7 @@ class Validator(BaseRunner):
         random_param_sets = [
             {
                 k: v
-                for k, v in study.parameters.random_guess(
-                    generator=generator
-                ).items()
+                for k, v in study.parameters.random_guess(generator=generator).items()
                 if k not in model_output_params
             }
             for _ in range(num_random_param_trials)
@@ -208,9 +204,7 @@ class Validator(BaseRunner):
         ],
         study: "hypex.Study",
         result_data_generation: "hypex.DataGenerationModule.Result",
-    ) -> t.List[
-        t.Tuple[float, float, "hypex.TrialResult", "hypex.NonLinearPC.Result"]
-    ]:
+    ) -> t.List[t.Tuple[float, float, "hypex.TrialResult", "hypex.NonLinearPC.Result"]]:
         if len(_input) != 1:
             raise ValueError("Expected one input")
         (
@@ -224,15 +218,11 @@ class Validator(BaseRunner):
 
         data_params = {
             entry["name"]: entry["value"]
-            for entry in result_data_generation.applied_mutations[
-                timeseries_name
-            ]
+            for entry in result_data_generation.applied_mutations[timeseries_name]
         }
         data_params["hypex_constant"] = 1
 
-        params = csl_result.parameter_model.predict(
-            **predefined_params, **data_params
-        )
+        params = csl_result.parameter_model.predict(**predefined_params, **data_params)
         trial_result = hypex.Optimizer.run_and_score_algorithm(
             trial_id=idx,
             study_name=study.name,
@@ -249,18 +239,16 @@ class Validator(BaseRunner):
 
     def _to_intermediate(
         self,
-        _input: t.List[
-            t.Tuple["hypex.TrialResult", "hypex.NonLinearPC.Result"]
-        ],
+        _input: t.List[t.Tuple["hypex.TrialResult", "hypex.NonLinearPC.Result"]],
         csl_result_alpha_beta: t.Dict[str, t.List[t.Tuple[float, float]]],
     ):
         trial_results_by_graph_hash = {}
         for entry in _input:
             trial_result, csl_result = entry
             graph_hash = csl_result.get_graph_hash()
-            trial_results_by_graph_hash[
-                graph_hash
-            ] = trial_results_by_graph_hash.get(graph_hash, []) + [trial_result]
+            trial_results_by_graph_hash[graph_hash] = trial_results_by_graph_hash.get(
+                graph_hash, []
+            ) + [trial_result]
 
         intermediates = []
         for graph_hash, trial_results in trial_results_by_graph_hash.items():
@@ -310,9 +298,7 @@ class Validator(BaseRunner):
                 continue
             mean_score = trial_results[score_variable].mean()
             mean_scores[alpha_beta] = mean_score
-            median_scores[alpha_beta] = trial_results[score_variable].quantile(
-                q=0.5
-            )
+            median_scores[alpha_beta] = trial_results[score_variable].quantile(q=0.5)
             num_edges = len(csl_result.graph_edges)
 
             mean_score_rounded = round(mean_score, 2)
@@ -371,9 +357,7 @@ class Validator(BaseRunner):
         all_parameter_names = set(
             [p.name for p in study.parameters.parameter_distributions]
         )
-        remaining_parameter_names = (
-            all_parameter_names - fixed_parameter_names
-        )
+        remaining_parameter_names = all_parameter_names - fixed_parameter_names
 
         if len(remaining_parameter_names) == 0:
             return Validator.Result(
@@ -417,9 +401,9 @@ class Validator(BaseRunner):
         def _get_best_params(trial_results: pd.DataFrame):
             print("trial_results.columns: ", trial_results.columns.to_list())
             max_score = trial_results[score_variable].max()
-            return trial_results[
-                trial_results[score_variable] == max_score
-            ].iloc[0]["optuna_guess_params"]
+            return trial_results[trial_results[score_variable] == max_score].iloc[0][
+                "optuna_guess_params"
+            ]
 
         best_fixed_params = _get_best_params(trial_results)
 
@@ -431,9 +415,7 @@ class Validator(BaseRunner):
     def run(
         self,
         all_timeseries_names: t.Dict[str, t.List[str]],
-        results_data_generation: t.Dict[
-            str, "hypex.DataGenerationModule.Result"
-        ],
+        results_data_generation: t.Dict[str, "hypex.DataGenerationModule.Result"],
         results_train: t.Dict[str, "hypex.CSLModule.Result"],
         studies: t.List[hypex.Study],
         score_variable: str,
@@ -457,9 +439,9 @@ class Validator(BaseRunner):
                 if len(csl_result.graph_edges) > 0:
                     graph_hash = csl_result.get_graph_hash()
                     csl_result_hashes[graph_hash] = csl_result
-                    csl_result_alpha_beta[
-                        graph_hash
-                    ] = csl_result_alpha_beta.get(graph_hash, []) + [alpha_beta]
+                    csl_result_alpha_beta[graph_hash] = csl_result_alpha_beta.get(
+                        graph_hash, []
+                    ) + [alpha_beta]
 
             _input = [
                 (timeseries_name, csl_result_hashes[graph_hash])
@@ -468,17 +450,13 @@ class Validator(BaseRunner):
             ]
 
             results[study.name] = self._get_best_alpha_beta_threshold(
-                intermediates=dask.bag.from_sequence(
-                    _input, npartitions=len(_input)
-                )
+                intermediates=dask.bag.from_sequence(_input, npartitions=len(_input))
                 .map_partitions(
                     self._map_parameters,
                     study=study,
                     num_random_param_trials=NUM_RANDOM_PARAM_TRIALS,
                 )
-                .repartition(
-                    npartitions=len(_input) * (1 + NUM_RANDOM_PARAM_TRIALS)
-                )
+                .repartition(npartitions=len(_input) * (1 + NUM_RANDOM_PARAM_TRIALS))
                 .map_partitions(
                     self._run_algorithm,
                     study=study,
@@ -503,9 +481,7 @@ class Validator(BaseRunner):
         results_train: t.Dict[str, "hypex.CSLModule.Result"],
         score_variable: str,
         best_threshold_results: t.Dict[str, BestThresholdResult],
-        results_data_generation: t.Dict[
-            str, "hypex.DataGenerationModule.Result"
-        ],
+        results_data_generation: t.Dict[str, "hypex.DataGenerationModule.Result"],
     ) -> t.Dict[str, "Result"]:
         results = {}
         for study in studies:

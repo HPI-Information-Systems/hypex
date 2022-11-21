@@ -53,9 +53,7 @@ class DataGenerationModule(BaseModule):
             applied_mutations = cls._load_dict(
                 path=output_dir / "timeseries_mutations.json"
             )
-            gutentag_configs = cls._load_dict(
-                path=output_dir / "gutentag_configs.json"
-            )
+            gutentag_configs = cls._load_dict(path=output_dir / "gutentag_configs.json")
             return cls(
                 data_paths={
                     ts_name: {k: Path(v) for k, v in paths.items()}
@@ -76,15 +74,11 @@ class DataGenerationModule(BaseModule):
         base_data_config: t.Dict[str, t.Any],
         base_timeseries_config: hypex.TimeseriesConfig,
         generator: "hypex.ValueGenerator",
-    ) -> t.Tuple[
-        t.List[t.Dict[str, str]], t.Dict[str, t.Any], t.Dict[str, t.Any]
-    ]:
+    ) -> t.Tuple[t.List[t.Dict[str, str]], t.Dict[str, t.Any], t.Dict[str, t.Any]]:
         output_dir.mkdir(parents=True, exist_ok=True)
         try:
             with open(output_dir / LOCK_FILENAME, "x"):
-                applied_mutations, gutentag_configs = DataGenerator(
-                    seed=self.seed
-                ).run(
+                applied_mutations, gutentag_configs = DataGenerator(seed=self.seed).run(
                     base_data_config=base_data_config,
                     base_timeseries_config=base_timeseries_config,
                     output_dir=output_dir,
@@ -101,9 +95,7 @@ class DataGenerationModule(BaseModule):
                                 "semi-supervised": output_dir
                                 / ts_name
                                 / "train_no_anomaly.csv",
-                                "unsupervised": output_dir
-                                / ts_name
-                                / "test.csv",
+                                "unsupervised": output_dir / ts_name / "test.csv",
                             }
                         }
                         for ts_name in applied_mutations.keys()

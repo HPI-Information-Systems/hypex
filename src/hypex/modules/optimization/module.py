@@ -114,9 +114,7 @@ class OptimizationModule(BaseModule):
 
             importance = {}
             try:
-                importance = optuna.importance.get_param_importances(
-                    study=study
-                )
+                importance = optuna.importance.get_param_importances(study=study)
             except Exception as e:
                 cls._logger.error(
                     "Failed to get parameter importances for study %s: %s",

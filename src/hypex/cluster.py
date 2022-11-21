@@ -33,9 +33,7 @@ class ClusterInstance:
 
         # Setup Dask logging
         self._logger.info("Configuring dask logging")
-        dask_config.config["distributed"][
-            "logging"
-        ] = self.config.dask_logging_config()
+        dask_config.config["distributed"]["logging"] = self.config.dask_logging_config()
 
     def get_client(self) -> dask.distributed.Client:
         return self.client
@@ -66,9 +64,7 @@ class ClusterInstance:
         Returns:
             t.Tuple[bool, asyncssh.SSHCompletedProcess]: _description_
         """
-        async with asyncssh.connect(
-            worker, **self.config.connect_options
-        ) as conn:
+        async with asyncssh.connect(worker, **self.config.connect_options) as conn:
             result = await conn.run(command, timeout=timeout, check=True)
             if result.returncode == 0:
                 self._logger.info(
@@ -76,9 +72,7 @@ class ClusterInstance:
                 )
                 return True, result
 
-            self._logger.error(
-                "Failed to execute '%s' on host %s", command, worker
-            )
+            self._logger.error("Failed to execute '%s' on host %s", command, worker)
             self._logger.error("Command's error output was %s", result.stderr)
             return False, result
 
@@ -95,16 +89,12 @@ class ClusterInstance:
                 failed_on.append(host)
             results.append(result)
         if len(failed_on) > 0:
-            raise RuntimeError(
-                f"Execution of '{command}' failed on hosts {failed_on}."
-            )
+            raise RuntimeError(f"Execution of '{command}' failed on hosts {failed_on}.")
         return results
 
     def set_up(self):
         try:
-            c = dask.distributed.Client(
-                self.config.dask_scheduler_url(), timeout=1
-            )
+            c = dask.distributed.Client(self.config.dask_scheduler_url(), timeout=1)
             self._logger.warning(
                 "Found a running scheduler. Thus shutting it down now..."
             )

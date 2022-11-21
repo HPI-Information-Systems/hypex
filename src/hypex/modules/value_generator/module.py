@@ -10,9 +10,7 @@ __all__ = ["ValueGenerator"]
 class ValueGenerator(BaseModule):
     _logger = logging.getLogger(__name__)
 
-    def _get_next_float_value(
-        self, min_value: float, max_value: float
-    ) -> float:
+    def _get_next_float_value(self, min_value: float, max_value: float) -> float:
         return random.uniform(min_value, max_value)
 
     def _get_next_int_value(self, min_value: int, max_value: int) -> int:

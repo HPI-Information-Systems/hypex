@@ -59,9 +59,7 @@ class DataConfigMutation:
                     "value": value,
                 }
             )
-            self._logger.info(
-                "mutated_data_gen_config: %s", mutated_data_gen_config
-            )
+            self._logger.info("mutated_data_gen_config: %s", mutated_data_gen_config)
 
         mutated_data_gen_config["name"] = ts_name
         num_anomalous_points = sum(

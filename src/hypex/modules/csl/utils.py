@@ -21,9 +21,7 @@ def dfs_visit_recursively(
     nodes_order = np.random.permutation(nodes_order)
     for child in nodes_order:
         if nodes_color[child] == 0:
-            dfs_visit_recursively(
-                graph, child, nodes_color, edges_to_be_removed
-            )
+            dfs_visit_recursively(graph, child, nodes_color, edges_to_be_removed)
         elif nodes_color[child] == 1:
             edges_to_be_removed.append((node, child))
 

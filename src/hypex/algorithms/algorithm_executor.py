@@ -5,11 +5,11 @@ import typing as t
 from pathlib import Path
 from time import sleep
 
+import docker
 import numpy as np
 from durations import Duration
 from requests.exceptions import ReadTimeout
 
-import docker
 import hypex
 
 __all__ = ["AlgorithmExecutor", "AlgorithmRuntimeException"]
@@ -76,15 +76,9 @@ class AlgorithmExecutor:
             "dataInput": str(
                 (Path(DATASET_MOUNT_PATH) / _dataset_path.name).absolute()
             ),
-            "dataOutput": str(
-                (Path(RESULTS_MOUNT_PATH) / SCORES_FILE_NAME).absolute()
-            ),
-            "modelInput": str(
-                (Path(RESULTS_MOUNT_PATH) / MODEL_FILE_NAME).absolute()
-            ),
-            "modelOutput": str(
-                (Path(RESULTS_MOUNT_PATH) / MODEL_FILE_NAME).absolute()
-            ),
+            "dataOutput": str((Path(RESULTS_MOUNT_PATH) / SCORES_FILE_NAME).absolute()),
+            "modelInput": str((Path(RESULTS_MOUNT_PATH) / MODEL_FILE_NAME).absolute()),
+            "modelOutput": str((Path(RESULTS_MOUNT_PATH) / MODEL_FILE_NAME).absolute()),
             "executionType": args.get("executionType", "execute"),
             "customParameters": args.get("hyper_params", {}),
         }
@@ -117,9 +111,7 @@ class AlgorithmExecutor:
                 )
                 return
             except docker.errors.ContainerError as e:
-                self._logger.error(
-                    "Docker container launch failed with error %s", e
-                )
+                self._logger.error("Docker container launch failed with error %s", e)
                 error = e
                 sleep(30)
 
@@ -181,9 +173,7 @@ class AlgorithmExecutor:
             self._get_results_path(args=args) / SCORES_FILE_NAME, delimiter=","
         )
 
-    def _postprocess(
-        self, scores: np.array, args: t.Dict[str, t.Any]
-    ) -> np.array:
+    def _postprocess(self, scores: np.array, args: t.Dict[str, t.Any]) -> np.array:
         if self.postprocess is not None:
             self._logger.info("Now postprocessing the algorithm's results...")
             return self.postprocess(scores, args)

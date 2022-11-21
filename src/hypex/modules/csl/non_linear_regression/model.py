@@ -90,10 +90,7 @@ class NonLinearRegression:
             transform_names = {k: v[0] for k, v in _tmp.items()}
             transform_funcs = {k: v[1] for k, v in _tmp.items()}
             data_X = pd.DataFrame(
-                {
-                    col: transform_funcs[col](data_x[col])
-                    for col in data_x.columns
-                }
+                {col: transform_funcs[col](data_x[col]) for col in data_x.columns}
             )
 
             linear_model, score, error = cls._fit_linear_regression(

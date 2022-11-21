@@ -12,9 +12,7 @@ __all__ = ["torsk"]
 # post-processing for Torsk
 def _post_torsk(scores: np.ndarray, args: dict) -> np.ndarray:
     pred_size = args.get("hyper_params", {}).get("prediction_window_size", 20)
-    context_window_size = args.get("hyper_params", {}).get(
-        "context_window_size", 10
-    )
+    context_window_size = args.get("hyper_params", {}).get("context_window_size", 10)
     size = pred_size * context_window_size + 1
     is_anomaly = ReverseWindowing(window_size=size).fit_transform(scores)
     return np.nan_to_num(is_anomaly, nan=0)

@@ -8,9 +8,7 @@ __all__ = ["Registry"]
 
 
 class Registry:
-    def __init__(
-        self, algorithms: t.Dict[str, "hypex.AlgorithmExecutor"]
-    ) -> None:
+    def __init__(self, algorithms: t.Dict[str, "hypex.AlgorithmExecutor"]) -> None:
         self.algorithms = algorithms
         self._logger = logging.getLogger(self.__class__.__name__)
 

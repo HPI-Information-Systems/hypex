@@ -87,9 +87,7 @@ class Optimizer:
         args = {
             "hyper_params": params,
             "results_path": results_dir,
-            "resource_constraints": timeeval.ResourceConstraints(
-                task_cpu_limit=1
-            ),
+            "resource_constraints": timeeval.ResourceConstraints(task_cpu_limit=1),
         }
 
         anomaly_scores = executor.execute(dataset_path=dataset_path, args=args)
@@ -149,13 +147,9 @@ class Optimizer:
                 exception=e,
             )
 
-        cls.get_logger().info(
-            "Now removing the content in %s", str(results_dir)
-        )
+        cls.get_logger().info("Now removing the content in %s", str(results_dir))
         shutil.rmtree(results_dir)
-        cls.get_logger().info(
-            "Sucessfully removed the content in %s", str(results_dir)
-        )
+        cls.get_logger().info("Sucessfully removed the content in %s", str(results_dir))
 
         score_path = "NOT_SAVED"
         # self._logger.info("Writing anomaly scores to disk...")
@@ -218,17 +212,13 @@ class Optimizer:
         # best_threshold = thresholds[idx]
 
         # Caluclate the best threshold (based on f1 score)
-        cls.get_logger().info(
-            "Now finding the best threshold based on the F1 score"
-        )
+        cls.get_logger().info("Now finding the best threshold based on the F1 score")
         idx = np.argmax(f1_scores)
         best_threshold = thresholds[idx]
 
         y_pred = anomaly_scores >= best_threshold
         cls.get_logger().info("Now calculating the accuracy score")
-        accuracy_score = metrics.accuracy_score(
-            y_true=test_is_anomaly, y_pred=y_pred
-        )
+        accuracy_score = metrics.accuracy_score(y_true=test_is_anomaly, y_pred=y_pred)
         f1_score = metrics.f1_score(y_true=test_is_anomaly, y_pred=y_pred)
 
         # Store the trial's result
@@ -281,9 +271,13 @@ class Optimizer:
             )
             self._logger.info("Parameter guess from Optuna: %s", optuna_guess_params)
 
-            def _get_next_guess(timeseries_name: str) -> t.Tuple[t.Dict[str, t.Any], t.Dict[str, t.Any]]:
+            def _get_next_guess(
+                timeseries_name: str,
+            ) -> t.Tuple[t.Dict[str, t.Any], t.Dict[str, t.Any]]:
                 params = (
-                    self.postprocess_parameter_guess(timeseries_name=timeseries_name, **optuna_guess_params)
+                    self.postprocess_parameter_guess(
+                        timeseries_name=timeseries_name, **optuna_guess_params
+                    )
                     if self.postprocess_parameter_guess is not None
                     else optuna_guess_params
                 )
@@ -293,7 +287,9 @@ class Optimizer:
             trial_result: hypex.TrialResult = None
             if len(self.timeseries_names) == 1:
                 timeseries_name = self.timeseries_names[0]
-                params, optuna_guess_params = _get_next_guess(timeseries_name=timeseries_name)
+                params, optuna_guess_params = _get_next_guess(
+                    timeseries_name=timeseries_name
+                )
                 trial_result = self.run_and_score_algorithm(
                     trial_id=trial.number,
                     study_name=self.study_name,
@@ -312,7 +308,9 @@ class Optimizer:
                         raise ValueError("Only one timeseries name allowed")
 
                     timeseries_name = timeseries_names[0]
-                    params, optuna_guess_params = _get_next_guess(timeseries_name=timeseries_name)
+                    params, optuna_guess_params = _get_next_guess(
+                        timeseries_name=timeseries_name
+                    )
                     return self.run_and_score_algorithm(
                         trial_id=trial.number,
                         study_name=self.study_name,
@@ -363,9 +361,7 @@ class Optimizer:
                 mean_roc_auc_score = float(
                     np.mean([x.roc_auc_score for x in trial_group])
                 )
-                mean_f1_score = float(
-                    np.mean([x.f1_score for x in trial_group])
-                )
+                mean_f1_score = float(np.mean([x.f1_score for x in trial_group]))
                 mean_accuracy_score = float(
                     np.mean([x.accuracy_score for x in trial_group])
                 )

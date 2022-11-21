@@ -83,13 +83,9 @@ class Evaluator(BaseRunner):
     def run(
         self,
         all_timeseries_names: t.Dict[str, t.List[str]],
-        results_data_generation: t.Dict[
-            str, "hypex.DataGenerationModule.Result"
-        ],
+        results_data_generation: t.Dict[str, "hypex.DataGenerationModule.Result"],
         results_train: t.Dict[str, "hypex.CSLModule.Result"],
-        results_best_thresholds: t.Dict[
-            str, "hypex.Validator.BestThresholdResult"
-        ],
+        results_best_thresholds: t.Dict[str, "hypex.Validator.BestThresholdResult"],
         results_fixed_parameters: t.Dict[str, "hypex.Validator.Result"],
         studies: t.List[hypex.Study],
     ) -> t.Dict[str, Result]:
@@ -128,11 +124,7 @@ class Evaluator(BaseRunner):
             alpha_beta = alpha, beta
 
             parameter_model = (
-                (
-                    results_train[study.name]
-                    .csl_candidates[alpha_beta]
-                    .parameter_model
-                )
+                (results_train[study.name].csl_candidates[alpha_beta].parameter_model)
                 if alpha is not None
                 else None
             )
@@ -157,9 +149,9 @@ class Evaluator(BaseRunner):
                     study.name
                 ].fixed_parameter_values,
             )
-            trial_results_parameter_model = dask.delayed(
-                Evaluator._trials_to_df
-            )(trial_results=result_parameter_model)
+            trial_results_parameter_model = dask.delayed(Evaluator._trials_to_df)(
+                trial_results=result_parameter_model
+            )
 
             # # Default parameters
             # result_default_parameters = hypex.EvaluationModule(

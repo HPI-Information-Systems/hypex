@@ -11,9 +11,7 @@ __all__ = []
 
 class BaseRunner(abc.ABC):
     @classmethod
-    def _trials_to_df(
-        cls, trial_results: t.List["hypex.TrialResult"]
-    ) -> pd.DataFrame:
+    def _trials_to_df(cls, trial_results: t.List["hypex.TrialResult"]) -> pd.DataFrame:
         return pd.DataFrame.from_dict(
             data=[t.to_dict() for t in trial_results],
             orient="columns",

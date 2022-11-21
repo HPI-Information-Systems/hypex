@@ -2,11 +2,8 @@ import argparse
 
 import hypex
 from hypex.cluster_config import ClusterConfig
-from hypex.utils.commands import (
-    install_dependencies,
-    run_command,
-    setup_remote,
-)
+from hypex.utils.commands import (install_dependencies, run_command,
+                                  setup_remote)
 
 
 def main(command: str, environment: str):
@@ -17,18 +14,14 @@ def main(command: str, environment: str):
         cluster_config = hypex.REMOTE_CLUSTER_CONFIG
     else:
         raise ValueError(f"Unknown environment: {environment}")
-    hosts = list(
-        set([cluster_config.scheduler_host] + cluster_config.worker_hosts)
-    )
+    hosts = list(set([cluster_config.scheduler_host] + cluster_config.worker_hosts))
 
     if command == "setup":
         setup_remote(hosts=hosts)
     elif command == "install":
         install_dependencies(hosts=hosts)
     elif command == "custom":
-        custom_cmd = input(
-            "Enter the command that shall be execute on all nodes: "
-        )
+        custom_cmd = input("Enter the command that shall be execute on all nodes: ")
         run_command(hosts=hosts, command=custom_cmd)
     else:
         raise ValueError(f"Unknown command: {command}")

@@ -22,9 +22,7 @@ def _upload_file(
     shutil.copyfile(path, temp_path)
 
     src = Path(temp_path).absolute()
-    _logger.info(
-        "Now copying file from %s to %s on remote hosts", src, dest_path
-    )
+    _logger.info("Now copying file from %s to %s on remote hosts", src, dest_path)
     client.copy_file(src, dest_path)
     client.join()
     os.remove(src)
