@@ -7,6 +7,8 @@ A Framework for Hyperparameter Optimization in Time Series Anomaly Detection
 You need the following:
 
 - Python 3.8 or Python 3.9
+- Docker
+- Every node must be able to connect to all other nodes via SSH and other sockets (ports)
 
 Then you can execute:
 
@@ -18,6 +20,12 @@ make setup
 
 This creates the dev environment in `.venv`, installs all dependencies, and HYPEX in development (editable) mode.
 
+You can start HYPEX using the following command:
+
+```sh
+source .venv/bin/activate
+python -m hypex -c example-config.yaml -e remote
+```
 
 ## Update Dependencies
 

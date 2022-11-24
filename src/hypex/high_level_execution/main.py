@@ -62,6 +62,127 @@ def get_tsfresh_features(path: Path):
     return [{"name": name, "value": float(func(values))} for name, func in FEATURES]
 
 
+base_data_path = Path(
+    "/home/projects/akita/data/benchmark-data/data-processed/univariate/KDD-TSAD"
+)
+test_datasets: t.Dict[str, t.Dict[str, Path]] = {
+    "229_UCR_Anomaly_mit14134longtermecg": {
+        "unsupervised": base_data_path / "229_UCR_Anomaly_mit14134longtermecg.test.csv"
+    },
+    "122_UCR_Anomaly_ECG3": {
+        "unsupervised": base_data_path / "122_UCR_Anomaly_ECG3.test.csv"
+    },
+    "235_UCR_Anomaly_mit14157longtermecg": {
+        "unsupervised": base_data_path / "235_UCR_Anomaly_mit14157longtermecg.test.csv"
+    },
+    "016_UCR_Anomaly_DISTORTEDECG4": {
+        "unsupervised": base_data_path / "016_UCR_Anomaly_DISTORTEDECG4.test.csv"
+    },
+    "233_UCR_Anomaly_mit14157longtermecg": {
+        "unsupervised": base_data_path / "233_UCR_Anomaly_mit14157longtermecg.test.csv"
+    },
+    "230_UCR_Anomaly_mit14134longtermecg": {
+        "unsupervised": base_data_path / "230_UCR_Anomaly_mit14134longtermecg.test.csv"
+    },
+    "125_UCR_Anomaly_ECG4": {
+        "unsupervised": base_data_path / "125_UCR_Anomaly_ECG4.test.csv"
+    },
+    "222_UCR_Anomaly_mit14046longtermecg": {
+        "unsupervised": base_data_path / "222_UCR_Anomaly_mit14046longtermecg.test.csv"
+    },
+    "012_UCR_Anomaly_DISTORTEDECG2": {
+        "unsupervised": base_data_path / "012_UCR_Anomaly_DISTORTEDECG2.test.csv"
+    },
+    "126_UCR_Anomaly_ECG4": {
+        "unsupervised": base_data_path / "126_UCR_Anomaly_ECG4.test.csv"
+    },
+    "228_UCR_Anomaly_mit14134longtermecg": {
+        "unsupervised": base_data_path / "228_UCR_Anomaly_mit14134longtermecg.test.csv"
+    },
+    "123_UCR_Anomaly_ECG4": {
+        "unsupervised": base_data_path / "123_UCR_Anomaly_ECG4.test.csv"
+    },
+    "231_UCR_Anomaly_mit14134longtermecg": {
+        "unsupervised": base_data_path / "231_UCR_Anomaly_mit14134longtermecg.test.csv"
+    },
+    "223_UCR_Anomaly_mit14046longtermecg": {
+        "unsupervised": base_data_path / "223_UCR_Anomaly_mit14046longtermecg.test.csv"
+    },
+    "014_UCR_Anomaly_DISTORTEDECG3": {
+        "unsupervised": base_data_path / "014_UCR_Anomaly_DISTORTEDECG3.test.csv"
+    },
+    "017_UCR_Anomaly_DISTORTEDECG4": {
+        "unsupervised": base_data_path / "017_UCR_Anomaly_DISTORTEDECG4.test.csv"
+    },
+    "096_UCR_Anomaly_NOISEECG4": {
+        "unsupervised": base_data_path / "096_UCR_Anomaly_NOISEECG4.test.csv"
+    },
+    "087_UCR_Anomaly_DISTORTEDsel840mECG1": {
+        "unsupervised": base_data_path / "087_UCR_Anomaly_DISTORTEDsel840mECG1.test.csv"
+    },
+    "225_UCR_Anomaly_mit14046longtermecg": {
+        "unsupervised": base_data_path / "225_UCR_Anomaly_mit14046longtermecg.test.csv"
+    },
+    "013_UCR_Anomaly_DISTORTEDECG3": {
+        "unsupervised": base_data_path / "013_UCR_Anomaly_DISTORTEDECG3.test.csv"
+    },
+    "226_UCR_Anomaly_mit14046longtermecg": {
+        "unsupervised": base_data_path / "226_UCR_Anomaly_mit14046longtermecg.test.csv"
+    },
+    "227_UCR_Anomaly_mit14134longtermecg": {
+        "unsupervised": base_data_path / "227_UCR_Anomaly_mit14134longtermecg.test.csv"
+    },
+    "119_UCR_Anomaly_ECG1": {
+        "unsupervised": base_data_path / "119_UCR_Anomaly_ECG1.test.csv"
+    },
+    "224_UCR_Anomaly_mit14046longtermecg": {
+        "unsupervised": base_data_path / "224_UCR_Anomaly_mit14046longtermecg.test.csv"
+    },
+    "120_UCR_Anomaly_ECG2": {
+        "unsupervised": base_data_path / "120_UCR_Anomaly_ECG2.test.csv"
+    },
+    "232_UCR_Anomaly_mit14134longtermecg": {
+        "unsupervised": base_data_path / "232_UCR_Anomaly_mit14134longtermecg.test.csv"
+    },
+    "011_UCR_Anomaly_DISTORTEDECG1": {
+        "unsupervised": base_data_path / "011_UCR_Anomaly_DISTORTEDECG1.test.csv"
+    },
+    "237_UCR_Anomaly_mit14157longtermecg": {
+        "unsupervised": base_data_path / "237_UCR_Anomaly_mit14157longtermecg.test.csv"
+    },
+    "196_UCR_Anomaly_sel840mECG2": {
+        "unsupervised": base_data_path / "196_UCR_Anomaly_sel840mECG2.test.csv"
+    },
+    "124_UCR_Anomaly_ECG4": {
+        "unsupervised": base_data_path / "124_UCR_Anomaly_ECG4.test.csv"
+    },
+    "238_UCR_Anomaly_mit14157longtermecg": {
+        "unsupervised": base_data_path / "238_UCR_Anomaly_mit14157longtermecg.test.csv"
+    },
+    "121_UCR_Anomaly_ECG3": {
+        "unsupervised": base_data_path / "121_UCR_Anomaly_ECG3.test.csv"
+    },
+    "018_UCR_Anomaly_DISTORTEDECG4": {
+        "unsupervised": base_data_path / "018_UCR_Anomaly_DISTORTEDECG4.test.csv"
+    },
+    "088_UCR_Anomaly_DISTORTEDsel840mECG2": {
+        "unsupervised": base_data_path / "088_UCR_Anomaly_DISTORTEDsel840mECG2.test.csv"
+    },
+    "234_UCR_Anomaly_mit14157longtermecg": {
+        "unsupervised": base_data_path / "234_UCR_Anomaly_mit14157longtermecg.test.csv"
+    },
+    "195_UCR_Anomaly_sel840mECG1": {
+        "unsupervised": base_data_path / "195_UCR_Anomaly_sel840mECG1.test.csv"
+    },
+    "236_UCR_Anomaly_mit14157longtermecg": {
+        "unsupervised": base_data_path / "236_UCR_Anomaly_mit14157longtermecg.test.csv"
+    },
+    "015_UCR_Anomaly_DISTORTEDECG4": {
+        "unsupervised": base_data_path / "015_UCR_Anomaly_DISTORTEDECG4.test.csv"
+    },
+}
+
+
 class Main:
     _logger = logging.getLogger(__name__)
 
@@ -131,18 +252,10 @@ class Main:
 
     def _docker_prune(self, cluster: "hypex.ClusterInstance"):
         self._logger.info("Running Docker Prune.")
-        _retval = list(
-            cluster.client.run(
-                docker_prune,
-            ).values()
-        )
+        _retval = list(cluster.client.run(docker_prune).values())
         self._logger.info("Docker Prune returned %s", _retval)
         self._logger.info("Running Docker Prune Cleanup.")
-        _retval = list(
-            cluster.client.run(
-                docker_prune_cleanup,
-            ).values()
-        )
+        _retval = list(cluster.client.run(docker_prune_cleanup).values())
         self._logger.info("Docker Prune Cleanup returned %s", _retval)
 
     def run(self, config_path: str, results_dir: str = "results") -> None:
@@ -229,22 +342,17 @@ class Main:
                         study_name=name,
                         base_output_dir=results_dir,
                     )
+
                     # TODO: remove
-                    results_data_generation[study.name].data_paths[
-                        "195_UCR_Anomaly_sel840mECG1"
-                    ] = {
-                        "unsupervised": Path(
-                            "/home/mats.poerschke/hypex-data/195_UCR_Anomaly_sel840mECG1.test.csv"
+                    study_dg_results = results_data_generation[study.name]
+                    study_dg_results.data_paths = test_datasets
+                    for dataset_name in test_datasets:
+                        study_dg_results.applied_mutations[
+                            dataset_name
+                        ] = get_tsfresh_features(
+                            study_dg_results.data_paths[dataset_name]["unsupervised"]
                         )
-                    }
-                    results_data_generation[study.name].applied_mutations[
-                        "195_UCR_Anomaly_sel840mECG1"
-                    ] = get_tsfresh_features(
-                        results_data_generation[study.name].data_paths[
-                            "195_UCR_Anomaly_sel840mECG1"
-                        ]["unsupervised"]
-                    )
-                    results_data_generation[study.name].save(
+                    study_dg_results.save(
                         study_name=study.name, base_output_dir=results_dir
                     )
                     dataset_splits[study.name] = Main.DatasetSplits.load(
@@ -252,7 +360,7 @@ class Main:
                         base_dir=results_dir,
                     )
                     # TODO: remove
-                    dataset_splits[study.name].test = ["195_UCR_Anomaly_sel840mECG1"]
+                    dataset_splits[study.name].test = list(test_datasets.keys())
                     dataset_splits[study.name].save(
                         study_name=study.name, base_dir=results_dir
                     )
@@ -266,26 +374,20 @@ class Main:
                         base_timeseries_config=study.timeseries,
                         generator=generator,
                     )
-                    results_data_generation[study.name].data_paths[
-                        "195_UCR_Anomaly_sel840mECG1"
-                    ] = {
-                        "unsupervised": Path(
-                            "/home/mats.poerschke/hypex-data/195_UCR_Anomaly_sel840mECG1.test.csv"
+                    study_dg_results = results_data_generation[study.name]
+                    study_dg_results.data_paths = test_datasets
+                    for dataset_name in test_datasets:
+                        study_dg_results.applied_mutations[
+                            dataset_name
+                        ] = get_tsfresh_features(
+                            study_dg_results.data_paths[dataset_name]["unsupervised"]
                         )
-                    }
-                    results_data_generation[study.name].applied_mutations[
-                        "195_UCR_Anomaly_sel840mECG1"
-                    ] = get_tsfresh_features(
-                        results_data_generation[study.name].data_paths[study.name][
-                            "unsupervised"
-                        ]
-                    )
-                    results_data_generation[study.name].save(
+                    study_dg_results.save(
                         study_name=study.name, base_output_dir=results_dir
                     )
 
                     (tmp_timeseries_names, timeseries_names_test,) = train_test_split(
-                        list(results_data_generation[study.name].data_paths.keys()),
+                        list(study_dg_results.data_paths.keys()),
                         test_size=DATASET_TEST_SIZE,
                         random_state=self.seed,
                     )
@@ -301,7 +403,7 @@ class Main:
                     dataset_splits[study.name] = Main.DatasetSplits(
                         train=timeseries_names_train,
                         validation=timeseries_names_validation,
-                        test=["195_UCR_Anomaly_sel840mECG1"],
+                        test=list(test_datasets.keys()),
                     )
                     dataset_splits[study.name].save(study.name, results_dir)
 
