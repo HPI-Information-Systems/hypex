@@ -237,7 +237,7 @@ class ClusterInstance:
                 sleep(5)
 
     def tear_down(self, reason: str):
-        self._logger.info("Now tearing down all resources. Reason %s", reason)
+        self._logger.info("Now tearing down all resources. Reason: %s", reason)
 
         if self.optuna_dashboard_container_id:
             self._logger.info(
