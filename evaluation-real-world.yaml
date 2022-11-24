@@ -66,69 +66,69 @@ mutations:
 
 
 studies:
-  # - name: Sub-LOF_real-world-ecg_v2
-  #   study_override: true
-  #   algorithm: sub_lof
-  #   n_trials:
-  #     train: 300
-  #     validation: 80
-  #     test_model: 100
-  #     test_full_optimization: 300
-  #   start_from_snapshot:
-  #     study_name: Sub-LOF_real-world-ecg_v2
-  #     train: true
-  #     best_thresholds: true
-  #     fixed_parameters: true
-  #     test: false
-  #   timeseries:
-  #     - name: real-world-ecg
-  #       <<: *real-world-ecg-mutations
-  #   parameters:
-  #     - name: window_size
-  #       dtype: int
-  #       min: 50
-  #       max: 250
-  #     - name: n_neighbors
-  #       dtype: int
-  #       min: 2
-  #       max: 100
-  #     - name: leaf_size
-  #       dtype: int
-  #       min: 10
-  #       max: 80
-  #     - name: random_state
-  #       dtype: int
-  #       min: 0
-  #       max: 42
+   - name: Sub-LOF_real-world-ecg_v2
+     study_override: true
+     algorithm: sub_lof
+     n_trials:
+       train: 300
+       validation: 80
+       test_model: 100
+       test_full_optimization: 300
+     start_from_snapshot:
+       study_name: Sub-LOF_real-world-ecg_v2
+       train: true
+       best_thresholds: true
+       fixed_parameters: true
+       test: false
+     timeseries:
+       - name: real-world-ecg
+         <<: *real-world-ecg-mutations
+     parameters:
+       - name: window_size
+         dtype: int
+         min: 50
+         max: 250
+       - name: n_neighbors
+         dtype: int
+         min: 2
+         max: 100
+       - name: leaf_size
+         dtype: int
+         min: 10
+         max: 80
+       - name: random_state
+         dtype: int
+         min: 0
+         max: 42
 
 
-  - name: STOMP_real-world
-    study_override: true
-    algorithm: stomp
-    n_trials:
-      train: 300
-      validation: 80
-      test_model: 100
-      test_full_optimization: 300
-    start_from_snapshot:
-      study_name: STOMP_real-world
-      train: false
-      best_thresholds: false
-      fixed_parameters: false
-      test: false
-    timeseries:
-      - name: real-world-ecg
-        <<: *real-world-ecg-mutations
-    parameters:
-      - name: anomaly_window_size
-        dtype: int
-        min: 10
-        max: 300
-      - name: exclusion_zone
-        dtype: float
-        min: 0.1
-        max: 1.0
-      - name: random_state
-        dtype: int
-        min: 0
-        max: 42
+#  - name: STOMP_real-world
+#    study_override: true
+#    algorithm: stomp
+#    n_trials:
+#      train: 300
+#      validation: 80
+#      test_model: 100
+#      test_full_optimization: 300
+#    start_from_snapshot:
+#      study_name: STOMP_real-world
+#      train: false
+#      best_thresholds: false
+#      fixed_parameters: false
+#      test: false
+#    timeseries:
+#      - name: real-world-ecg
+#        <<: *real-world-ecg-mutations
+#    parameters:
+#      - name: anomaly_window_size
+#        dtype: int
+#        min: 10
+#        max: 300
+#      - name: exclusion_zone
+#        dtype: float
+#        min: 0.1
+#        max: 1.0
+#      - name: random_state
+#        dtype: int
+#        min: 0
+#        max: 42
