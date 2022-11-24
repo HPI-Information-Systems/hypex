@@ -1,25 +1,26 @@
 VENV_NAME?=.venv
 PYTHON=${VENV_NAME}/bin/python3
 PACKAGE_DIR=src/hypex
+TEST_DIR=tests
+
+.PHONY: release deps install-dev install-ci install test format lint clean setupCI setup create-env run-remote
 
 run-remote:
 	make package
 	${PYTHON} ${PACKAGE_DIR} --environment remote --config evaluation.yaml 2>&1 | tee run.log
 
-setup:
+create-env:
 	python3 -m venv ${VENV_NAME}
 	${PYTHON} -m pip install --upgrade pip
-	${PYTHON} setup.py develop
-	make install
 
-setupCI:
-	python3 -m venv ${VENV_NAME}
-	${PYTHON} -m pip install --upgrade pip
-	${PYTHON} -m pip install -r requirements-ci.txt
+setup: create-env install-dev
+
+setupCI: create-env install-ci
 
 clean:
 	rm -r ${VENV_NAME}
-	make setup
+	rm -r dist build
+	rm -r **/__pycache__
 
 lint:
 	${PYTHON} -m pylint ${PACKAGE_DIR}
@@ -29,13 +30,22 @@ format:
 	${PYTHON} -m black ${PACKAGE_DIR}
 
 test:
-	${PYTHON} -m pytest tests -vv
+	${PYTHON} -m pytest ${TEST_DIR} -vv
 
 install:
-	${PYTHON} -m pip install pip-tools
+	${PYTHON} -m pip install -r requirements.txt
+	${PYTHON} -m pip install .
+
+install-ci:
+	${PYTHON} -m pip install -r requirements-ci.txt
+	${PYTHON} -m pip install .
+
+install-dev:
 	${PYTHON} -m pip install -r requirements-dev.txt
+	${PYTHON} -m pip install -e .
 
 deps:
+	${PYTHON} -m pip install pip-tools
 	${PYTHON} -m piptools compile requirements.in
 	${PYTHON} -m piptools compile requirements-ci.in -o requirements-ci.txt
 	${PYTHON} -m piptools compile requirements-dev.in -o requirements-dev.txt

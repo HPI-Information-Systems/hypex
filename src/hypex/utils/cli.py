@@ -2,8 +2,7 @@ import argparse
 
 import hypex
 from hypex.cluster_config import ClusterConfig
-from hypex.utils.commands import (install_dependencies, run_command,
-                                  setup_remote)
+from hypex.utils.commands import install_dependencies, run_command, setup_remote
 
 
 def main(command: str, environment: str):

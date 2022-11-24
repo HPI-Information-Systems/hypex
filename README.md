@@ -4,37 +4,32 @@ A Framework for Hyperparameter Optimization in Time Series Anomaly Detection
 
 ## Development Setup
 
-Creates dev environment in `.venv` and installs all dependencies.
+You need the following:
+
+- Python 3.8 or Python 3.9
+
+Then you can execute:
 
 ```sh
+git clone git@github.com:HPI-Information-Systems/hypex.git
+cd hypex
 make setup
 ```
 
-## Local Execution
+This creates the dev environment in `.venv`, installs all dependencies, and HYPEX in development (editable) mode.
 
-1. Start a local cluster using
-
-   ```sh
-   make cluster
-   ```
-
-2. Run the parameter optimization on the local cluster using
-
-   ```sh
-   make run
-   ```
 
 ## Update Dependencies
 
-1. Add dependency to `requirements.in`
-2. Add dependency to `setup.cfg` under `install_requires`
-3. Pip-compile dependencies
+1. Add dependency to `requirements.in`, `requirements-ci.in`, or `requirements-dev.in`
+2. Add dependency to `setup.cfg` under `install_requires` if its a runtime dependency
+3. Pip-compile all dependencies to generate the `requirements*.txt`-files:
 
    ```sh
    make deps
    ```
 
-   This will also install the new dependencies.
+4. To install the dependencies run `make install` or `make install-dev`.
 
 ## Release a New Version
 
