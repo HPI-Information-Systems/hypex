@@ -2,6 +2,7 @@ import logging
 import typing as t
 from dataclasses import dataclass
 from pathlib import Path
+from uuid import uuid4
 
 import hypex
 
@@ -73,6 +74,7 @@ class DataGenerationModule(BaseModule):
         output_dir: Path,
         base_data_config: t.Dict[str, t.Any],
         base_timeseries_config: hypex.TimeseriesConfig,
+        timeseries_names: t.List[str],
         generator: "hypex.ValueGenerator",
     ) -> t.Tuple[t.List[t.Dict[str, str]], t.Dict[str, t.Any], t.Dict[str, t.Any]]:
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -81,6 +83,7 @@ class DataGenerationModule(BaseModule):
                 applied_mutations, gutentag_configs = DataGenerator(seed=self.seed).run(
                     base_data_config=base_data_config,
                     base_timeseries_config=base_timeseries_config,
+                    timeseries_names=timeseries_names,
                     output_dir=output_dir,
                     generator=generator,
                 )
@@ -130,6 +133,10 @@ class DataGenerationModule(BaseModule):
                 output_dir=output_dir,
                 base_data_config=base_data_config,
                 base_timeseries_config=base_timeseries_config,
+                timeseries_names=[
+                    base_timeseries_config.name + str(uuid4())
+                    for _ in range(base_timeseries_config.n_mutations)
+                ],
                 generator=generator,
             ).values()
         )

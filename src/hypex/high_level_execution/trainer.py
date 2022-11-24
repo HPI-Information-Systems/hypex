@@ -36,7 +36,7 @@ class Trainer(BaseRunner):
         t.List["hypex.OptimizationModule.Intermediate"],
     ]:
         optimization_module = hypex.OptimizationModule(
-            storage=self.storage,
+            get_optuna_storage=self.get_optuna_storage,
             study_name=study.name,
             timeseries_names=timeseries_names,
             data_paths=result_data_generation.data_paths,
@@ -115,7 +115,7 @@ class Trainer(BaseRunner):
         }
 
         optimiztion_result = hypex.OptimizationModule(
-            storage=self.storage,
+            get_optuna_storage=self.get_optuna_storage,
             study_name=study.name,
             timeseries_names=timeseries_names,
             data_paths=result_data_generation.data_paths,

@@ -14,7 +14,7 @@ class BaseResult(abc.ABC):
         return logging.getLogger(__name__)
 
     def _save_dict(self, data: dict, path: Path):
-        self.get_logger().info("Saving dict to %s", path)
+        self.get_logger().info("Saving dict %s to %s", data, path)
         with open(path, "w") as file:
             json.dump(data, file)
 

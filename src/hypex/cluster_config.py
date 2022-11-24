@@ -27,13 +27,15 @@ class ClusterConfig:
     log_level: str = "INFO"
     log_filename: str = "dask.log"
 
-    optuna_storage: OptunaStorage = None
+    get_optuna_storage: t.Callable[[], OptunaStorage] = None
 
     def __post_init__(self):
-        if not self.optuna_storage:
-            self.optuna_storage = OptunaStorage.get(
+        if not self.get_optuna_storage:
+            port = OptunaStorage.get_port()
+            self.get_optuna_storage = lambda: OptunaStorage.get(
                 storage_type=OptunaStorageType.MYSQL,
                 scheduler_host=self.scheduler_host,
+                port=port,
             )
 
     def dask_scheduler_url(self) -> str:
@@ -44,7 +46,8 @@ class ClusterConfig:
             "hosts": [self.scheduler_host] + self.worker_hosts,
             "connect_options": self.connect_options,
             "worker_options": {
-                "nworkers": self.tasks_per_host,
+                "nprocs": self.tasks_per_host,
+                # "n_workers": self.tasks_per_host,
                 "nthreads": 1,
                 "memory_limit": self.task_memory_limit,
             },
@@ -101,11 +104,27 @@ LOCAL_CLUSTER_CONFIG = ClusterConfig(
 #     remote_python="~/hypex/.venv/bin/python",
 # )
 
-EC2_NODE = "ec2-35-158-134-31.eu-central-1.compute.amazonaws.com"
+SCHEDULER_IP = "172.20.11.101"
+WORKER_IPs = [
+    "172.20.11.101",
+    # "172.20.11.102",  # currently used by other project
+    "172.20.11.103",
+    "172.20.11.104",
+    "172.20.11.105",
+    "172.20.11.106",
+    "172.20.11.107",
+    "172.20.11.108",
+    "172.20.11.109",
+    "172.20.11.110",
+    "172.20.11.111",
+    "172.20.11.112",
+    "172.20.11.113",
+    "172.20.11.114",
+]
 
 REMOTE_CLUSTER_CONFIG = ClusterConfig(
-    scheduler_host=EC2_NODE,
-    worker_hosts=[EC2_NODE],
+    scheduler_host=SCHEDULER_IP,
+    worker_hosts=WORKER_IPs,
     remote_python=sys.executable,  # "~/hypex/.venv/bin/python",
     tasks_per_host=os.cpu_count() - 6,
 )

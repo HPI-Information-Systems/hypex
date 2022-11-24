@@ -262,7 +262,10 @@ class Optimizer:
         # trial_results_path.mkdir(exist_ok=True)
 
         def func(trial: optuna.Trial):
-            self.check_trial_is_updatable(trial_number=trial.number)
+            try:
+                self.check_trial_is_updatable(trial_number=trial.number)
+            except KeyError:
+                sleep(5)
 
             # Generate a next best parameter guess
             self._logger.info("Now awaiting the next parameter guess")

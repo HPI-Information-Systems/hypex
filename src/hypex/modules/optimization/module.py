@@ -7,6 +7,7 @@ import dask.bag
 import optuna
 
 import hypex
+from hypex.optuna_storage import OptunaStorage
 
 from ..base_module import BaseModule
 from .optimizer import Optimizer
@@ -31,7 +32,7 @@ class OptimizationModule(BaseModule):
     def __init__(
         self,
         algorithm: str,
-        storage: str,
+        get_optuna_storage: t.Callable[[], OptunaStorage],
         study_name: str,
         timeseries_names: str,
         data_paths: t.Dict[str, t.Dict[str, Path]],
@@ -44,7 +45,7 @@ class OptimizationModule(BaseModule):
     ) -> None:
         super().__init__(seed)
         self.algorithm = algorithm
-        self.storage = storage
+        self.get_optuna_storage = get_optuna_storage
         self.study_name = study_name
         self.timeseries_names = timeseries_names
         self.data_paths = data_paths
@@ -62,8 +63,9 @@ class OptimizationModule(BaseModule):
         n_startup_trials: str,
         seed: int,
         suffix: str,
-        storage: "hypex.OptunaStorage",
+        get_optuna_storage: t.Callable[[], "hypex.OptunaStorage"],
     ) -> Intermediate:
+        storage = get_optuna_storage()
         optuna_study = optuna.create_study(
             study_name=f"study-{study_name}-{timeseries_name}-{suffix}",
             storage=storage.get_storage_backend(),
@@ -102,14 +104,14 @@ class OptimizationModule(BaseModule):
     def _get_result(
         cls,
         intermediates: t.List[Intermediate],
-        storage: "hypex.OptunaStorage",
+        get_optuna_storage: t.Callable[[], "hypex.OptunaStorage"],
         trial_results: t.List["hypex.TrialResult"],
     ) -> Result:
         importances = {}
         for intermediate in intermediates:
             study = optuna.load_study(
                 study_name=intermediate.optuna_study_name,
-                storage=storage.get_storage_backend(),
+                storage=get_optuna_storage().get_storage_backend(),
             )
 
             importance = {}
@@ -132,7 +134,7 @@ class OptimizationModule(BaseModule):
         cls,
         intermediates: t.List[Intermediate],
         batch_size: int,
-        storage: "hypex.OptunaStorage",
+        get_optuna_storage: t.Callable[[], "hypex.OptunaStorage"],
         parameter_distribution: "hypex.MultidimensionalParameterDistribution",
         algorithm: str,
         study_name: str,
@@ -145,6 +147,7 @@ class OptimizationModule(BaseModule):
             raise ValueError("intermediates must contain a single element.")
 
         intermediate = intermediates[0]
+
         # if (
         #     postprocess_parameter_guess is not None
         #     and len(intermediate.timeseries_names) != 1
@@ -165,7 +168,7 @@ class OptimizationModule(BaseModule):
             return []
 
         return Optimizer(
-            storage=storage,
+            storage=get_optuna_storage(),
             parameter_distribution=parameter_distribution,
             postprocess_parameter_guess=postprocess_parameter_guess,
             timeseries_names=intermediate.timeseries_names,
@@ -184,7 +187,7 @@ class OptimizationModule(BaseModule):
                 timeseries_name=ts_name,
                 study_name=self.study_name,
                 n_startup_trials=self.n_startup_trials,
-                storage=self.storage,
+                get_optuna_storage=self.get_optuna_storage,
                 seed=self.seed,
                 suffix=self.suffix,
             )
@@ -196,7 +199,7 @@ class OptimizationModule(BaseModule):
             timeseries_name="all-timeseries",
             study_name=self.study_name,
             n_startup_trials=self.n_startup_trials,
-            storage=self.storage,
+            get_optuna_storage=self.get_optuna_storage,
             seed=self.seed,
             suffix=self.suffix,
         )
@@ -225,7 +228,7 @@ class OptimizationModule(BaseModule):
                     OptimizationModule._run_trial,
                     batch_size=1,
                     study_name=self.study_name,
-                    storage=self.storage,
+                    get_optuna_storage=self.get_optuna_storage,
                     parameter_distribution=self.parameter_distribution,
                     algorithm=self.algorithm,
                     data_paths=self.data_paths,
@@ -245,7 +248,7 @@ class OptimizationModule(BaseModule):
         return OptimizationModule._get_result(
             intermediates=input_data,
             trial_results=trial_results,
-            storage=self.storage,
+            get_optuna_storage=self.get_optuna_storage,
         )
 
     def run(

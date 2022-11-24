@@ -136,7 +136,7 @@ class Main:
             cluster.start_optuna_shared_storage()
             cluster.start_optuna_dashboard()
             data_dir = Path("hypex-data")
-            storage = self.cluster_config.optuna_storage
+            get_optuna_storage = self.cluster_config.get_optuna_storage
 
             generator = hypex.ValueGenerator(seed=self.seed)
 
@@ -251,7 +251,9 @@ class Main:
                     # )
                     # results_train.update(_results_train)
                 else:
-                    trainer = hypex.Trainer(seed=self.seed, storage=storage)
+                    trainer = hypex.Trainer(
+                        seed=self.seed, get_optuna_storage=get_optuna_storage
+                    )
                     optimization_module, _input_data = trainer.prepare_partial(
                         timeseries_names=dataset_splits[study.name].train,
                         result_data_generation=results_data_generation[study.name],
@@ -268,10 +270,12 @@ class Main:
                             n_trials=n_trials,
                             trial_group_size=n_trials,
                         )
+                        print("_partial_results - 1:", _partial_results)
                         _partial_results = self._compute_with_progress(
                             client=cluster.client,
                             items=_partial_results,
                         )
+                        print("_partial_results - 2:", _partial_results)
                         num_successful_trials = len(
                             list(
                                 filter(
@@ -280,6 +284,7 @@ class Main:
                                 )
                             )
                         )
+                        print("num_successful_trials - 2:", num_successful_trials)
                         partial_results += _partial_results
                         self._docker_prune(cluster=cluster)
 
@@ -328,7 +333,7 @@ class Main:
                     studies_to_run_best_threshold.append(study)
 
             _results_best_thresholds = hypex.Validator(
-                seed=self.seed, storage=storage
+                seed=self.seed, get_optuna_storage=get_optuna_storage
             ).run(
                 all_timeseries_names={
                     s.name: dataset_splits[s.name].validation
@@ -364,7 +369,7 @@ class Main:
                     studies_to_run_fixed_params.append(study)
 
             _results_fixed_parameters = hypex.Validator(
-                seed=self.seed, storage=storage
+                seed=self.seed, get_optuna_storage=get_optuna_storage
             ).run_determine_fixed_paramters(
                 all_timeseries_names={
                     s.name: dataset_splits[s.name].validation
@@ -398,7 +403,7 @@ class Main:
                     )
                 else:
                     results_evaluation = hypex.Evaluator(
-                        seed=self.seed, storage=storage
+                        seed=self.seed, get_optuna_storage=get_optuna_storage
                     ).run(
                         all_timeseries_names={
                             study.name: dataset_splits[study.name].test

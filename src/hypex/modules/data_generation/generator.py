@@ -36,12 +36,13 @@ class DataGenerator:
         self,
         base_data_config: t.Dict[str, t.Any],
         base_timeseries_config: hypex.TimeseriesConfig,
+        timeseries_names: t.List[str],
         output_dir: Path,
         generator: "hypex.ValueGenerator",
     ) -> t.Tuple[t.Dict[str, t.List[t.Dict[str, t.Any]]], t.Dict[str, t.Any]]:
         applied_mutations, gutentag_configs = {}, {}
         mutation_generator = DataConfigMutation(seed=self.seed)
-        for _ in range(base_timeseries_config.n_mutations):
+        for idx in range(base_timeseries_config.n_mutations):
             (
                 gutentag_config,
                 _applied_mutations,
@@ -49,6 +50,7 @@ class DataGenerator:
             ) = mutation_generator.get_mutation(
                 base_data_config=base_data_config,
                 base_timeseries_config=base_timeseries_config,
+                timeseries_name=timeseries_names[idx],
                 generator=generator,
             )
             self._generate(gutentag_config=gutentag_config, output_dir=output_dir)

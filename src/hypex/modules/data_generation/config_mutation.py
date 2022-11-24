@@ -1,7 +1,6 @@
 import logging
 import random
 import typing as t
-from uuid import uuid4
 
 import hypex
 
@@ -19,6 +18,7 @@ class DataConfigMutation:
         self,
         base_data_config: t.Dict,
         base_timeseries_config: hypex.TimeseriesConfig,
+        timeseries_name: str,
         generator: "hypex.ValueGenerator",
     ) -> t.Tuple[t.Dict[str, t.Any], t.List[t.Dict[str, t.Any]], str]:
         applied_mutations = []
@@ -34,8 +34,6 @@ class DataConfigMutation:
                 f"Did not expect to find {len(data_gen_config)} timeseries with name {base_timeseries_config.name}"
             )
         mutated_data_gen_config = data_gen_config[0].copy()
-
-        ts_name = base_timeseries_config.name + str(uuid4())
 
         for mutation in base_timeseries_config.mutations:
             value = generator.run(**mutation.to_kwargs())
@@ -61,7 +59,7 @@ class DataConfigMutation:
             )
             self._logger.info("mutated_data_gen_config: %s", mutated_data_gen_config)
 
-        mutated_data_gen_config["name"] = ts_name
+        mutated_data_gen_config["name"] = timeseries_name
         num_anomalous_points = sum(
             map(
                 lambda x: x["length"],
@@ -76,7 +74,7 @@ class DataConfigMutation:
             }
         )
 
-        return mutated_data_gen_config, applied_mutations, ts_name
+        return mutated_data_gen_config, applied_mutations, timeseries_name
 
 
 def deep_update(
@@ -100,7 +98,9 @@ def deep_update(
 
     if type(source) is list:
         if not key.isdigit():
-            raise ValueError("Expected list index to be an integer")
+            raise ValueError(
+                f"Expected list index to be an integer, but was {key} of type {type(key)}"
+            )
 
         if int(key) < len(source):
             source[int(key)] = deep_update(

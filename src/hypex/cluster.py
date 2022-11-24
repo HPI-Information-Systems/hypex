@@ -104,15 +104,9 @@ class ClusterInstance:
             self._logger.error(ex)
 
         self._logger.info("Creating dask SSH cluster...")
-
-        self.cluster = dask.distributed.LocalCluster(
-            n_workers=self.config.tasks_per_host,
-            processes=True,
-            threads_per_worker=1,
+        self.cluster = dask.distributed.SSHCluster(
+            **self.config.dask_ssh_cluster_config()
         )
-        # dask.distributed.SSHCluster(
-        #     **self.config.dask_ssh_cluster_config()
-        # )
         self.client = dask.distributed.Client(self.cluster.scheduler_address)
         self._logger.info("Successfully connected to the dask cluster")
 
@@ -128,9 +122,9 @@ class ClusterInstance:
             len(self.config.worker_hosts) * self.config.tasks_per_host,
         )
 
-        # self._logger.info("Uploading local changes to cluster...")
-        # self._upload_local_code_changes()
-        # self._logger.info("Sucessfully uploaded local changes to cluster")
+        self._logger.info("Uploading local changes to cluster...")
+        self._upload_local_code_changes()
+        self._logger.info("Sucessfully uploaded local changes to cluster")
 
     def _upload_local_code_changes(self):
         FILTER = "./dist/*.egg"
@@ -158,34 +152,35 @@ class ClusterInstance:
             sock.close()
 
     def start_optuna_shared_storage(self) -> str:
+        storage = self.config.get_optuna_storage()
         self._logger.info(
             "Setting up %s container on scheduler...",
-            self.config.optuna_storage.type,
+            storage.type,
         )
         container_id = asyncio.run(
             self.run_on_worker_ssh(
                 worker=self.config.scheduler_host,
-                command=self.config.optuna_storage.get_docker_command(),
+                command=storage.get_docker_command(),
                 timeout=60,
             )
         )[1].stdout.strip()
         self._logger.info(
             "%s container started with id %s",
-            self.config.optuna_storage.type,
+            storage.type,
             container_id,
         )
         self.running_container_ids.append(container_id)
-        url = self.config.optuna_storage.get_uri()
+        url = storage.get_uri()
 
         self._wait_until_up_and_running(
-            name=self.config.optuna_storage.type,
-            ping_func=self.config.optuna_storage.get_ping_func(),
+            name=storage.type,
+            ping_func=storage.get_ping_func(),
         )
         return url
 
     def start_optuna_dashboard(self, wait=False):
         self._logger.info("Now starting Optuna dashboard...")
-        storage_url = self.config.optuna_storage.get_uri()
+        storage_url = self.config.get_optuna_storage().get_uri()
         self.optuna_dashboard_container_id = asyncio.run(
             self.run_on_worker_ssh(
                 worker=self.config.scheduler_host,
@@ -260,10 +255,11 @@ class ClusterInstance:
             )
             self._logger.info("Stopped Optuna Dashboard container on scheduler")
 
+        storage = self.config.get_optuna_storage()
         for idx, container_id in enumerate(self.running_container_ids):
             self._logger.info(
                 "Stopping %s container %s on scheduler [%d/%d] ...",
-                self.config.optuna_storage.type,
+                storage.type,
                 container_id,
                 idx + 1,
                 len(self.running_container_ids),
@@ -277,7 +273,7 @@ class ClusterInstance:
             )
             self._logger.info(
                 "Stopped %s container %s on scheduler [%d/%d]",
-                self.config.optuna_storage.type,
+                storage.type,
                 container_id,
                 idx + 1,
                 len(self.running_container_ids),

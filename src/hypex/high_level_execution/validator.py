@@ -381,7 +381,7 @@ class Validator(BaseRunner):
         trial_results = (
             hypex.EvaluationModule(seed=self.seed)
             .run(
-                storage=self.storage,
+                get_optuna_storage=self.get_optuna_storage,
                 study=study,
                 parameter_model=parameter_model,
                 timeseries_names=timeseries_names,

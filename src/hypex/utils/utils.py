@@ -3,8 +3,10 @@ import logging
 import sys
 import threading
 from pathlib import Path
+from time import sleep
 
 import docker
+import requests
 
 __all__ = ["timeout", "docker_prune", "docker_prune_cleanup"]
 
@@ -52,6 +54,12 @@ def docker_prune():
             "Could not aquire lock. There must be another worker pruning docker containers. "
             "Thus skipping the pruning."
         )
+    except requests.exceptions.ReadTimeout:
+        _logger.warning(
+            "Could not prune containers due to Docker API timeout."
+            "Thus skipping the pruning."
+        )
+        sleep(5)
 
 
 def docker_prune_cleanup():

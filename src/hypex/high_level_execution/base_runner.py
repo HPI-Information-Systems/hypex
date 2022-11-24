@@ -5,6 +5,7 @@ import dask
 import pandas as pd
 
 import hypex
+from hypex.optuna_storage import OptunaStorage
 
 __all__ = []
 
@@ -17,9 +18,11 @@ class BaseRunner(abc.ABC):
             orient="columns",
         )
 
-    def __init__(self, seed: int, storage: "hypex.OptunaStorage") -> None:
+    def __init__(
+        self, seed: int, get_optuna_storage: t.Callable[[], OptunaStorage]
+    ) -> None:
         self.seed = seed
-        self.storage = storage
+        self.get_optuna_storage = get_optuna_storage
         hypex.use_seed(seed=self.seed)
 
     def run(self):
