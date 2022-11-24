@@ -42,7 +42,7 @@ def get_timeeval_params(
 
 def dbstream() -> AlgorithmExecutor:
     return AlgorithmExecutor(
-        image_name="ghcr.io/mschroederi/dbstream:latest",
+        image_name="registry.gitlab.hpi.de/akita/i/dbstream:latest",
         postprocess=None,
         default_params={
             "window_size": 20,

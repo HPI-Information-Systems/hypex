@@ -33,7 +33,7 @@ def get_timeeval_params(
 
 def sub_if() -> AlgorithmExecutor:
     return AlgorithmExecutor(
-        image_name="ghcr.io/mschroederi/subsequence-if:latest",
+        image_name="registry.gitlab.hpi.de/akita/i/subsequence-if:latest",
         postprocess=postprocess_sub_if,
         default_params={
             "window_size": 100,

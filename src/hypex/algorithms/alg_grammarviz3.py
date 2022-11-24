@@ -56,7 +56,7 @@ def get_timeeval_params(
 
 def grammarviz3() -> AlgorithmExecutor:
     return AlgorithmExecutor(
-        image_name="ghcr.io/mschroederi/grammarviz3:latest",
+        image_name="registry.gitlab.hpi.de/akita/i/grammarviz3:latest",
         postprocess=post_grammarviz,
         default_params={
             "anomaly_window_size": 170,

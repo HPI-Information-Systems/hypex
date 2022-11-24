@@ -33,7 +33,7 @@ def get_timeeval_params(
 
 def donut() -> AlgorithmExecutor:
     return AlgorithmExecutor(
-        image_name="ghcr.io/mschroederi/donut:latest",
+        image_name="registry.gitlab.hpi.de/akita/i/donut:latest",
         postprocess=_post_donut,
         default_params={
             "window_size": 120,

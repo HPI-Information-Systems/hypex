@@ -36,7 +36,7 @@ def get_timeeval_params(
 
 def series2graph() -> AlgorithmExecutor:
     return AlgorithmExecutor(
-        image_name="ghcr.io/mschroederi/series2graph:latest",
+        image_name="registry.gitlab.hpi.de/akita/i/series2graph:latest",
         postprocess=post_s2g,
         default_params={
             "window_size": 50,

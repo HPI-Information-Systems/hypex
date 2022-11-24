@@ -56,7 +56,7 @@ def get_timeeval_params(
 
 def torsk() -> AlgorithmExecutor:
     return AlgorithmExecutor(
-        image_name="ghcr.io/mschroederi/torsk:latest",
+        image_name="registry.gitlab.hpi.de/akita/i/torsk:latest",
         postprocess=_post_torsk,
         default_params={
             "input_map_size": 100,

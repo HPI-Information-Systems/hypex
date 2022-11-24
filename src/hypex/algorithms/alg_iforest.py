@@ -16,7 +16,7 @@ def get_timeeval_params(
 
 def iforest() -> AlgorithmExecutor:
     return AlgorithmExecutor(
-        image_name="ghcr.io/mschroederi/iforest:latest",
+        image_name="registry.gitlab.hpi.de/akita/i/iforest:latest",
         postprocess=None,
         default_params={
             "n_trees": 100,

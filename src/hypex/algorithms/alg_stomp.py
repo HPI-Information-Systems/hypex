@@ -34,7 +34,7 @@ def get_timeeval_params(
 
 def stomp() -> AlgorithmExecutor:
     return AlgorithmExecutor(
-        image_name="ghcr.io/mschroederi/stomp:latest",
+        image_name="registry.gitlab.hpi.de/akita/i/stomp:latest",
         postprocess=post_stomp,
         default_params={
             "anomaly_window_size": 30,

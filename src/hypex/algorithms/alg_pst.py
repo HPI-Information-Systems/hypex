@@ -5,7 +5,7 @@ __all__ = ["pst"]
 
 def pst() -> AlgorithmExecutor:
     return AlgorithmExecutor(
-        image_name="ghcr.io/mschroederi/pst:latest",
+        image_name="registry.gitlab.hpi.de/akita/i/pst:latest",
         postprocess=None,
         default_params={
             "window_size": 5,

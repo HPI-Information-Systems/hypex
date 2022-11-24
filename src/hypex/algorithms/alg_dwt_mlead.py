@@ -19,7 +19,7 @@ def get_timeeval_params(
 
 def dwt_mlead() -> AlgorithmExecutor:
     return AlgorithmExecutor(
-        image_name="ghcr.io/mschroederi/dwt-mlead:latest",
+        image_name="registry.gitlab.hpi.de/akita/i/dwt-mlead:latest",
         postprocess=None,
         default_params={
             "start_level": 3,
