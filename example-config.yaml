@@ -1,0 +1,77 @@
+timeseries:
+  - name: example-ecg-signal
+    length: 10000
+    anomalies:
+    - position: middle
+      length: 200
+      kinds:
+      - kind: frequency
+        frequency_factor: 2.0
+    base-oscillations:
+    - amplitude: 15
+      ecg-sim-method: ecgsyn
+      frequency: 1
+      kind: ecg
+      offset: -2
+      variance: 0.01
+
+
+mutations:
+  - &ecg-mutations
+    n_mutations: 10
+    mutations:
+      - name: base-oscillations.0.frequency
+        paths:
+          - base-oscillations.0.frequency
+        dtype: float
+        min: 0.4
+        max: 0.8
+      - name: base-oscillations.0.variance
+        paths:
+          - base-oscillations.0.variance
+        dtype: float
+        min: 0.001
+        max: 0.1
+      - name: anomalies.0.length
+        paths:
+          - anomalies.0.length
+        dtype: int
+        min: 100
+        max: 500
+
+
+studies:
+  - name: simple-study-using-LOF
+    study_override: true
+    algorithm: sub_lof
+    n_trials:
+      train: 200
+      validation: 50
+      test_model: 50
+      test_full_optimization: 200
+    start_from_snapshot:
+      study_name: simple-study-using-LOF
+      train: false
+      best_thresholds: false
+      fixed_parameters: false
+      test: false
+    timeseries:
+      - name: example-ecg-signal
+        <<: *ecg-mutations
+    parameters:
+     - name: window_size
+       dtype: int
+       min: 50
+       max: 250
+     - name: n_neighbors
+       dtype: int
+       min: 2
+       max: 100
+     - name: leaf_size
+       dtype: int
+       min: 10
+       max: 80
+     - name: random_state
+       dtype: int
+       min: 0
+       max: 42
