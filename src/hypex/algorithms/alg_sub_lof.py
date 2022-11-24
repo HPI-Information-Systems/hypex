@@ -34,7 +34,7 @@ def get_timeeval_params(
 
 def sub_lof() -> AlgorithmExecutor:
     return AlgorithmExecutor(
-        image_name="registry.gitlab.hpi.de/akita/i/subsequence-lof:latest",
+        image_name="registry.gitlab.hpi.de/akita/i/subsequence_lof:latest",
         postprocess=postprocess_sub_lof,
         default_params={
             "window_size": 100,
