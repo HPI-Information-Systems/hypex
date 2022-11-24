@@ -57,7 +57,7 @@ def get_tsfresh_features(path: Path):
         ("abs_energy", abs_energy),
     ]
 
-    values = pd.read_csv(path)["value-0"]
+    values = pd.read_csv(path).iloc[:, 1]
 
     return [{"name": name, "value": float(func(values))} for name, func in FEATURES]
 

@@ -76,6 +76,7 @@ cloudpickle==2.2.0
     # via
     #   dask
     #   distributed
+    #   tsfresh
 cmaes==0.9.0
     # via optuna
 cmd2==2.4.2
@@ -92,11 +93,12 @@ cryptography==38.0.3
     # via asyncssh
 cycler==0.11.0
     # via matplotlib
-dask[diagnostics,distributed]==2021.5.1
+dask[dataframe,diagnostics,distributed]==2021.5.1
     # via
     #   -r requirements.in
     #   distributed
     #   timeeval
+    #   tsfresh
 debugpy==1.6.3
     # via ipykernel
 decorator==5.1.1
@@ -106,7 +108,9 @@ defusedxml==0.7.1
 dill==0.3.6
     # via pylint
 distributed==2021.05.1
-    # via dask
+    # via
+    #   dask
+    #   tsfresh
 docker==6.0.1
     # via timeeval
 durations==0.3.3
@@ -153,6 +157,7 @@ importlib-metadata==4.13.0
     #   cliff
     #   jupyterlab-server
     #   nbconvert
+    #   numba
     #   optuna
 importlib-resources==5.10.0
     # via
@@ -237,6 +242,8 @@ kiwisolver==1.3.2
     #   matplotlib
 lazy-object-proxy==1.8.0
     # via astroid
+llvmlite==0.39.1
+    # via numba
 locket==1.0.0
     # via partd
 mako==1.2.4
@@ -248,6 +255,7 @@ markupsafe==2.1.1
     #   nbconvert
 matplotlib==3.6.2
     # via
+    #   matrixprofile
     #   neurokit2
     #   seaborn
     #   timeeval
@@ -256,6 +264,8 @@ matplotlib-inline==0.1.6
     # via
     #   ipykernel
     #   ipython
+matrixprofile==1.1.10
+    # via tsfresh
 mccabe==0.7.0
     # via pylint
 mistune==2.0.4
@@ -303,13 +313,18 @@ notebook==6.5.2
     # via jupyterlab
 notebook-shim==0.2.2
     # via nbclassic
+numba==0.56.4
+    # via stumpy
 numpy==1.23.5
     # via
     #   bokeh
     #   cmaes
     #   contourpy
+    #   dask
     #   matplotlib
+    #   matrixprofile
     #   neurokit2
+    #   numba
     #   numpyencoder
     #   opt-einsum
     #   optuna
@@ -321,8 +336,10 @@ numpy==1.23.5
     #   scipy
     #   seaborn
     #   statsmodels
+    #   stumpy
     #   timeeval
     #   timeeval-gutentag
+    #   tsfresh
 numpyencoder==0.3.0
     # via timeeval
 nvidia-cublas-cu11==11.10.3.66
@@ -364,12 +381,14 @@ pandas==1.5.2
     # via
     #   -r requirements.in
     #   bokeh
+    #   dask
     #   neurokit2
     #   pgmpy
     #   seaborn
     #   statsmodels
     #   timeeval
     #   timeeval-gutentag
+    #   tsfresh
 pandocfilters==1.5.0
     # via nbconvert
 parallel-ssh==2.12.0
@@ -381,7 +400,9 @@ partd==1.3.0
 pathspec==0.10.2
     # via black
 patsy==0.5.3
-    # via statsmodels
+    # via
+    #   statsmodels
+    #   tsfresh
 pbr==5.11.0
     # via stevedore
 pexpect==4.8.0
@@ -415,6 +436,8 @@ prometheus-client==0.15.0
     #   notebook
 prompt-toolkit==3.0.33
     # via ipython
+protobuf==3.11.2
+    # via matrixprofile
 prts==1.0.0.3
     # via timeeval
 psutil==5.9.4
@@ -483,6 +506,7 @@ requests==2.28.1
     #   -r requirements.in
     #   docker
     #   jupyterlab-server
+    #   tsfresh
 scikit-learn==1.1.3
     # via
     #   neurokit2
@@ -490,13 +514,17 @@ scikit-learn==1.1.3
     #   pgmpy
     #   timeeval
     #   timeeval-gutentag
+    #   tsfresh
 scipy==1.8.1
     # via
+    #   matrixprofile
     #   neurokit2
     #   optuna
     #   pgmpy
     #   scikit-learn
     #   statsmodels
+    #   stumpy
+    #   tsfresh
 seaborn==0.12.1
     # via -r requirements-dev.in
 send2trash==1.8.0
@@ -513,6 +541,7 @@ six==1.16.0
     #   asttokens
     #   bleach
     #   patsy
+    #   protobuf
     #   python-dateutil
 smmap==5.0.0
     # via gitdb
@@ -536,8 +565,11 @@ statsmodels==0.13.5
     # via
     #   pgmpy
     #   timeeval
+    #   tsfresh
 stevedore==4.1.1
     # via cliff
+stumpy==1.11.1
+    # via tsfresh
 tblib==1.7.0
     # via distributed
 terminado==0.17.0
@@ -588,6 +620,7 @@ tqdm==4.64.1
     #   pgmpy
     #   timeeval
     #   timeeval-gutentag
+    #   tsfresh
 traitlets==5.5.0
     # via
     #   ipykernel
@@ -601,6 +634,8 @@ traitlets==5.5.0
     #   nbconvert
     #   nbformat
     #   notebook
+tsfresh==0.19.0
+    # via -r requirements.in
 typing-extensions==4.4.0
     # via
     #   astroid
