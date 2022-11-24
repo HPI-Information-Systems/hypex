@@ -155,7 +155,7 @@ class EvaluationModule(BaseModule):
 
     def run(
         self,
-        storage: "hypex.OptunaStorage",
+        get_optuna_storage: t.Callable[[], "hypex.OptunaStorage"],
         study: hypex.Study,
         timeseries_names: t.List[str],
         data_paths: t.Dict[str, str],
@@ -196,7 +196,7 @@ class EvaluationModule(BaseModule):
         )
 
         return hypex.OptimizationModule(
-            storage=storage,
+            get_optuna_storage=get_optuna_storage,
             study_name=study.name,
             timeseries_names=timeseries_names,
             data_paths=data_paths,

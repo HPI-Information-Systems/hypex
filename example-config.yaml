@@ -45,16 +45,16 @@ studies:
     study_override: true
     algorithm: sub_lof
     n_trials:
-      train: 200
-      validation: 50
-      test_model: 50
-      test_full_optimization: 200
-    start_from_snapshot:
-      study_name: simple-study-using-LOF
-      train: false
-      best_thresholds: false
-      fixed_parameters: false
-      test: false
+      train: 100
+      validation: 20
+      test_model: 20
+      test_full_optimization: 100
+#    start_from_snapshot:
+#      study_name: simple-study-using-LOF
+#      train: false
+#      best_thresholds: false
+#      fixed_parameters: false
+#      test: false
     timeseries:
       - name: example-ecg-signal
         <<: *ecg-mutations
