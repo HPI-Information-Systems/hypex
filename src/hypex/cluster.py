@@ -100,8 +100,8 @@ class ClusterInstance:
             )
             c.shutdown()
         # Connection timeout
-        except OSError as ex:
-            self._logger.error(ex)
+        except OSError:
+            self._logger.info("No running scheduler found.")
 
         self._logger.info("Creating dask SSH cluster...")
         self.cluster = dask.distributed.SSHCluster(
@@ -236,10 +236,8 @@ class ClusterInstance:
                 )
                 sleep(5)
 
-    def tear_down(self):
-        self._logger.info(
-            "Now tearing down all resources",
-        )
+    def tear_down(self, reason: str):
+        self._logger.info("Now tearing down all resources. Reason %s", reason)
 
         if self.optuna_dashboard_container_id:
             self._logger.info(
@@ -313,4 +311,10 @@ class Cluster:
         traceback: t.Optional[TracebackType],
     ):
         if self.instance:
-            self.instance.tear_down()
+            if exc_type is not None and exc_type == KeyboardInterrupt:
+                reason = "HYPEX was stopped by user."
+            elif exc is not None:
+                reason = f"HYPEX ran into an error ({exc})"
+            else:
+                reason = "HYPEX finished processing all trails."
+            self.instance.tear_down(reason)

@@ -49,7 +49,7 @@ class ClusterConfig:
                 "nprocs": self.tasks_per_host,
                 # "n_workers": self.tasks_per_host,
                 "nthreads": 1,
-                "memory_limit": self.task_memory_limit,
+                "memory_limit": self.task_memory_limit or "auto",
             },
             "scheduler_options": {
                 "host": self.scheduler_host,
