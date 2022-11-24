@@ -20,9 +20,9 @@ _logger = logging.getLogger(__name__)
 class Evaluator(BaseRunner):
     @dataclass
     class Result(BaseResult):
-        # trial_results_full_optimization: pd.DataFrame
+        trial_results_full_optimization: pd.DataFrame
         trial_results_parameter_model: pd.DataFrame
-        # trial_results_default_parameters: pd.DataFrame
+        trial_results_default_parameters: pd.DataFrame
         # trial_results_timeeval_parameters: pd.DataFrame
         applied_mutations: t.Dict[str, t.Dict[str, str]]
 
@@ -63,14 +63,14 @@ class Evaluator(BaseRunner):
                 path=output_dir / "timeseries_mutations.json",
             )
 
-            # self._save_dataframe(
-            #     data=self.trial_results_full_optimization,
-            #     path=output_dir / "trial_results_full_optimization.csv",
-            # )
-            # self._save_dataframe(
-            #     data=self.trial_results_default_parameters,
-            #     path=output_dir / "trial_results_default_parameters.csv",
-            # )
+            self._save_dataframe(
+                data=self.trial_results_full_optimization,
+                path=output_dir / "trial_results_full_optimization.csv",
+            )
+            self._save_dataframe(
+                data=self.trial_results_default_parameters,
+                path=output_dir / "trial_results_default_parameters.csv",
+            )
             self._save_dataframe(
                 data=self.trial_results_parameter_model,
                 path=output_dir / "trial_results_parameter_model.csv",
@@ -100,23 +100,21 @@ class Evaluator(BaseRunner):
                 if k in timeseries_names
             }
 
-            # # Without restrictions
-            # results_full_optimization = hypex.EvaluationModule(
-            #     seed=self.seed
-            # ).run(
-            #     storage=self.storage,
-            #     study=study,
-            #     parameter_model=None,
-            #     timeseries_names=timeseries_names,
-            #     data_paths=result_data_generation.data_paths,
-            #     applied_mutations=applied_mutations,
-            #     suffix="no-restrictions",
-            #     n_trials=study.n_trials.test_full_optimization,
-            #     parameter_distribution=study.parameters.parameter_distributions,
-            # )
-            # trial_results_full_optimization = dask.delayed(
-            #     Evaluator._trials_to_df
-            # )(trial_results=results_full_optimization.trial_results)
+            # Full Optimization
+            results_full_optimization = hypex.EvaluationModule(seed=self.seed).run(
+                get_optuna_storage=self.get_optuna_storage,
+                study=study,
+                parameter_model=None,
+                timeseries_names=timeseries_names,
+                data_paths=result_data_generation.data_paths,
+                applied_mutations=applied_mutations,
+                suffix="no-restrictions",
+                n_trials=study.n_trials.test_full_optimization,
+                parameter_distribution=study.parameters,
+            )
+            trial_results_full_optimization = dask.delayed(Evaluator._trials_to_df)(
+                trial_results=results_full_optimization.trial_results
+            )
 
             # Our parameter model
             alpha = results_best_thresholds[study.name].best_alpha_threshold
@@ -153,17 +151,17 @@ class Evaluator(BaseRunner):
                 trial_results=result_parameter_model
             )
 
-            # # Default parameters
-            # result_default_parameters = hypex.EvaluationModule(
-            #     seed=self.seed
-            # ).run_with_default_parameters(
-            #     study=study,
-            #     timeseries_names=timeseries_names,
-            #     data_paths=result_data_generation.data_paths,
-            # )
-            # trial_results_default_parameters = dask.delayed(
-            #     Evaluator._trials_to_df
-            # )(trial_results=result_default_parameters)
+            # Default parameters
+            result_default_parameters = hypex.EvaluationModule(
+                seed=self.seed
+            ).run_with_default_parameters(
+                study=study,
+                timeseries_names=timeseries_names,
+                data_paths=result_data_generation.data_paths,
+            )
+            trial_results_default_parameters = dask.delayed(Evaluator._trials_to_df)(
+                trial_results=result_default_parameters
+            )
 
             # # Timeeval parameters
             # result_timeeval_parameters = hypex.EvaluationModule(
@@ -179,9 +177,9 @@ class Evaluator(BaseRunner):
             # )(trial_results=result_timeeval_parameters)
 
             results[study.name] = Evaluator.Result(
-                # trial_results_full_optimization=trial_results_full_optimization,
+                trial_results_full_optimization=trial_results_full_optimization,
                 trial_results_parameter_model=trial_results_parameter_model,
-                # trial_results_default_parameters=trial_results_default_parameters,
+                trial_results_default_parameters=trial_results_default_parameters,
                 # trial_results_timeeval_parameters=trial_results_timeeval_parameters,
                 applied_mutations=applied_mutations,
             )

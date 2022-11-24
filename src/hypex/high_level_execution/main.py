@@ -7,7 +7,22 @@ from pathlib import Path
 import dask
 import dask.distributed
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import train_test_split
+from tsfresh.feature_extraction.feature_calculators import (
+    abs_energy,
+    fourier_entropy,
+    length,
+    longest_strike_above_mean,
+    longest_strike_below_mean,
+    maximum,
+    mean,
+    median,
+    minimum,
+    number_peaks,
+    standard_deviation,
+    variance,
+)
 
 import hypex
 
@@ -20,6 +35,31 @@ DEFAULT_SEED = 2
 DATASET_TEST_SIZE = 0.2
 DATASET_VALIDATION_SIZE = 0.25
 TRAIN_BATCH_SIZE = 50
+
+
+def get_tsfresh_features(path: Path):
+    FEATURES = [
+        # basic statistics
+        ("length", length),
+        ("minimum", minimum),
+        ("maximum", maximum),
+        ("mean", mean),
+        ("median", median),
+        ("standard_deviation", standard_deviation),
+        # frequency
+        ("number_peaks", lambda x: number_peaks(x, n=20)),
+        ("longest_strike_above_mean", longest_strike_above_mean),
+        ("longest_strike_below_mean", longest_strike_below_mean),
+        # noise
+        ("variance", variance),
+        # complexity
+        ("fourier_entropy", lambda x: fourier_entropy(x, bins=100)),
+        ("abs_energy", abs_energy),
+    ]
+
+    values = pd.read_csv(path)["value-0"]
+
+    return [{"name": name, "value": float(func(values))} for name, func in FEATURES]
 
 
 class Main:
@@ -147,6 +187,40 @@ class Main:
             for study in studies:
                 self._logger.info("Starting study %s", study.name)
 
+                # results_data_generation[
+                #     study.name
+                # ] = hypex.DataGenerationModule.Result(
+                #     data_paths={
+                #         "synthetic-ts-name-1": data_dir / study.name / "ts-name-1",
+                #         "synthetic-ts-name-2": data_dir / study.name / "ts-name-2",
+                #         # Real world timeseries
+                #         "real-world-ts-name-1": data_dir
+                #         / study.name
+                #         / "real-world-ts-name-1",
+                #     },
+                #     applied_mutations={
+                #         "ts-name-1": [
+                #             {"tsfresh-characteristic-1": "value-1"},
+                #             {"tsfresh-characteristic-1": "value-2"},
+                #         ],
+                #         "ts-name-2": [
+                #             {"tsfresh-characteristic-1": "value-1"},
+                #             {"tsfresh-characteristic-1": "value-2"},
+                #         ],
+                #         # Real world timeseries
+                #         "real-world-ts-name-1": [
+                #             {"tsfresh-characteristic-1": "value-1"},
+                #             {"tsfresh-characteristic-1": "value-2"},
+                #         ],
+                #     },
+                #     gutentag_configs={},
+                # )
+                # dataset_splits[study.name] = Main.DatasetSplits(
+                #     train=["ts-name-1", "ts-name-2"],
+                #     validation=["ts-name-1", "ts-name-2"],
+                #     test=["real-world-ts-name"],
+                # )
+
                 if study.start_from_snapshot is not None:
                     name = f"{study.start_from_snapshot.study_name}.{study.timeseries.name}"
                     results_data_generation[
@@ -155,6 +229,21 @@ class Main:
                         study_name=name,
                         base_output_dir=results_dir,
                     )
+                    # TODO: remove
+                    results_data_generation[study.name].data_paths[
+                        "195_UCR_Anomaly_sel840mECG1"
+                    ] = {
+                        "unsupervised": Path(
+                            "/home/mats.poerschke/hypex-data/195_UCR_Anomaly_sel840mECG1.test.csv"
+                        )
+                    }
+                    results_data_generation[study.name].applied_mutations[
+                        "195_UCR_Anomaly_sel840mECG1"
+                    ] = get_tsfresh_features(
+                        results_data_generation[study.name].data_paths[
+                            "195_UCR_Anomaly_sel840mECG1"
+                        ]["unsupervised"]
+                    )
                     results_data_generation[study.name].save(
                         study_name=study.name, base_output_dir=results_dir
                     )
@@ -162,6 +251,8 @@ class Main:
                         study_name=name,
                         base_dir=results_dir,
                     )
+                    # TODO: remove
+                    dataset_splits[study.name].test = ["195_UCR_Anomaly_sel840mECG1"]
                     dataset_splits[study.name].save(
                         study_name=study.name, base_dir=results_dir
                     )
@@ -174,6 +265,20 @@ class Main:
                         base_data_config=raw_config,
                         base_timeseries_config=study.timeseries,
                         generator=generator,
+                    )
+                    results_data_generation[study.name].data_paths[
+                        "195_UCR_Anomaly_sel840mECG1"
+                    ] = {
+                        "unsupervised": Path(
+                            "/home/mats.poerschke/hypex-data/195_UCR_Anomaly_sel840mECG1.test.csv"
+                        )
+                    }
+                    results_data_generation[study.name].applied_mutations[
+                        "195_UCR_Anomaly_sel840mECG1"
+                    ] = get_tsfresh_features(
+                        results_data_generation[study.name].data_paths[study.name][
+                            "unsupervised"
+                        ]
                     )
                     results_data_generation[study.name].save(
                         study_name=study.name, base_output_dir=results_dir
@@ -196,7 +301,7 @@ class Main:
                     dataset_splits[study.name] = Main.DatasetSplits(
                         train=timeseries_names_train,
                         validation=timeseries_names_validation,
-                        test=timeseries_names_test,
+                        test=["195_UCR_Anomaly_sel840mECG1"],
                     )
                     dataset_splits[study.name].save(study.name, results_dir)
 
@@ -226,13 +331,19 @@ class Main:
                         study_name=name,
                         base_dir=results_dir,
                     )
+
+                    # results_train[study.name].applied_mutations = {
+                    #     name: get_tsfresh_features(paths["unsupervised"])
+                    #     for name, paths in results_data_generation[
+                    #         study.name
+                    #     ].data_paths.items()
+                    # }
+
                     # # TODO: Remove
                     # _results_train = {
                     #     study.name: hypex.CSLModule(seed=self.seed).run(
                     #         study=study,
-                    #         trial_results=results_train[
-                    #             study.name
-                    #         ].trial_results,
+                    #         trial_results=results_train[study.name].trial_results,
                     #         parameter_importances=results_train[
                     #             study.name
                     #         ].parameter_importances,
@@ -261,7 +372,10 @@ class Main:
                     )
 
                     partial_results = hypex.Trainer.PartialResult.empty()
-                    remaining_trials = study.n_trials.train
+                    remaining_trials = {
+                        ts_name: study.n_trials.train
+                        for ts_name in [ele.timeseries_names for ele in _input_data]
+                    }
                     while remaining_trials > 0:
                         n_trials = min(TRAIN_BATCH_SIZE, remaining_trials)
                         _partial_results = trainer.run_partial(

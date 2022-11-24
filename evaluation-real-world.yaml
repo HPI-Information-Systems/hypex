@@ -1,0 +1,134 @@
+timeseries:
+  - name: real-world-ecg
+    length: 10000
+    anomalies:
+    - position: middle
+      length: 363
+      kinds:
+      - kind: pattern-shift
+        shift_by: -80
+        transition_window: 120
+    base-oscillations:
+    - amplitude: 170
+      ecg-sim-method: ecgsyn
+      frequency: 0.56
+      kind: ecg
+      offset: -8
+      variance: 0.01
+
+
+mutations:
+  - &real-world-ecg-mutations
+    n_mutations: 50
+    mutations:
+      - name: base-oscillations.0.frequency
+        paths:
+          - base-oscillations.0.frequency
+        dtype: float
+        min: 0.4
+        max: 0.8
+      - name: base-oscillations.0.variance
+        paths:
+          - base-oscillations.0.variance
+        dtype: float
+        min: 0.001
+        max: 0.1
+      - name: base-oscillations.0.amplitude
+        paths:
+          - base-oscillations.0.amplitude
+        dtype: int
+        min: 100
+        max: 200
+      - name: base-oscillations.0.offset
+        paths:
+          - base-oscillations.0.offset
+        dtype: int
+        min: -15
+        max: 15
+      - name: anomalies.0.length
+        paths:
+          - anomalies.0.length
+        dtype: int
+        min: 300
+        max: 500
+      - name: anomalies.0.kinds.0.shift_by
+        paths:
+          - anomalies.0.kinds.0.shift_by
+        dtype: int
+        min: -50
+        max: 50
+      - name: anomalies.0.kinds.0.transition_window
+        paths:
+          - anomalies.0.kinds.0.transition_window
+        dtype: int
+        min: 50
+        max: 150
+
+
+studies:
+  # - name: Sub-LOF_real-world-ecg_v2
+  #   study_override: true
+  #   algorithm: sub_lof
+  #   n_trials:
+  #     train: 300
+  #     validation: 80
+  #     test_model: 100
+  #     test_full_optimization: 300
+  #   start_from_snapshot:
+  #     study_name: Sub-LOF_real-world-ecg_v2
+  #     train: true
+  #     best_thresholds: true
+  #     fixed_parameters: true
+  #     test: false
+  #   timeseries:
+  #     - name: real-world-ecg
+  #       <<: *real-world-ecg-mutations
+  #   parameters:
+  #     - name: window_size
+  #       dtype: int
+  #       min: 50
+  #       max: 250
+  #     - name: n_neighbors
+  #       dtype: int
+  #       min: 2
+  #       max: 100
+  #     - name: leaf_size
+  #       dtype: int
+  #       min: 10
+  #       max: 80
+  #     - name: random_state
+  #       dtype: int
+  #       min: 0
+  #       max: 42
+
+
+  - name: STOMP_real-world
+    study_override: true
+    algorithm: stomp
+    n_trials:
+      train: 300
+      validation: 80
+      test_model: 100
+      test_full_optimization: 300
+    start_from_snapshot:
+      study_name: STOMP_real-world
+      train: false
+      best_thresholds: false
+      fixed_parameters: false
+      test: false
+    timeseries:
+      - name: real-world-ecg
+        <<: *real-world-ecg-mutations
+    parameters:
+      - name: anomaly_window_size
+        dtype: int
+        min: 10
+        max: 300
+      - name: exclusion_zone
+        dtype: float
+        min: 0.1
+        max: 1.0
+      - name: random_state
+        dtype: int
+        min: 0
+        max: 42
