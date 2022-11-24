@@ -4,8 +4,6 @@ git+https://github.com/HPI-Information-Systems/TimeEval.git@feat/open-dep-versio
 # replace with timeeval_gutentag>=1.2.0 once released
 git+ssh://git@gitlab.hpi.de/akita/guten-tag.git@feat/open-dep-versions
 
-git+https://github.com/oxcsml/kerpy.git # for (conditional) independence testing
-
 importlib-metadata # required for python_version<"3.8"
 jsonschema
 dask[distributed,diagnostics]==2021.5.1 # required for TimeEval
