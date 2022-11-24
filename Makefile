@@ -26,7 +26,7 @@ lint:
 
 format:
 	${PYTHON} -m isort --profile black ${PACKAGE_DIR}
-	${PYTHON} -m black -l 80 ${PACKAGE_DIR}
+	${PYTHON} -m black ${PACKAGE_DIR}
 
 test:
 	${PYTHON} -m pytest tests -vv
@@ -37,13 +37,8 @@ install:
 
 deps:
 	${PYTHON} -m piptools compile requirements.in
-	${PYTHON} -m piptools compile requirements-base.in -o requirements-base.txt
-	${PYTHON} -m piptools compile requirements-dev.in -o requirements-dev.txt
 	${PYTHON} -m piptools compile requirements-ci.in -o requirements-ci.txt
-	make install
-
-docs:
-	${PYTHON} -m tox -e docs
+	${PYTHON} -m piptools compile requirements-dev.in -o requirements-dev.txt
 
 package:
 	rm -f dist/*

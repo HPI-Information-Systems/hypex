@@ -1,9 +1,6 @@
--r requirements-base.in
+-r requirements.in
 
-# Dev dependencies
-pyscaffold
-autopep8
+# CI dependencies
 black
 pylint
 pytest
-tox

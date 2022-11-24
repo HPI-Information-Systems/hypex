@@ -1,5 +1,27 @@
--r requirements-ci.in
+# replace with timeeval>=1.2.7 once released
+git+https://github.com/HPI-Information-Systems/TimeEval.git@feat/open-dep-versions
 
-git+ssh://git@gitlab.hpi.de/mats.poerschke/timeeval.git@dev
-git+ssh://git@gitlab.hpi.de/mats.poerschke/guten-tag.git@requirements
-git+ssh://git@github.com/oxcsml/kerpy.git
+# replace with timeeval_gutentag>=1.2.0 once released
+git+ssh://git@gitlab.hpi.de/akita/guten-tag.git@feat/open-dep-versions
+
+git+https://github.com/oxcsml/kerpy.git # for (conditional) independence testing
+
+importlib-metadata # required for python_version<"3.8"
+jsonschema
+dask[distributed,diagnostics]==2021.5.1 # required for TimeEval
+optuna>=3.0.0
+optuna-dashboard
+pandas
+pyyaml
+redis # Optuna Redis
+pymysql # Optuna MySQL
+mysqlclient # MySQL Connection
+kiwisolver==1.3.2 # Fixes observed issue with installing kiwisolver 1.4.0 and 1.4.1
+parallel-ssh # For remote cluster setup
+portalocker
+pgmpy
+requests
+
+# Dask Dashboard
+bokeh
+jupyter-server-proxy
