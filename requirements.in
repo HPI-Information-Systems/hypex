@@ -1,8 +1,5 @@
-# replace with timeeval>=1.2.7 once released
-git+https://github.com/HPI-Information-Systems/TimeEval.git@feat/open-dep-versions
-
-# replace with timeeval_gutentag>=1.2.0 once released
-git+ssh://git@gitlab.hpi.de/akita/guten-tag.git@feat/open-dep-versions
+timeeval>=1.2.8
+timeeval-gutentag>=1.2.0
 
 importlib-metadata # required for python_version<"3.8"
 jsonschema
