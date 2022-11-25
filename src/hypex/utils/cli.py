@@ -6,7 +6,6 @@ from hypex.utils.commands import install_dependencies, run_command, setup_remote
 
 
 def main(command: str, environment: str):
-    cluster_config: ClusterConfig = None
     if environment == "local":
         cluster_config = hypex.LOCAL_CLUSTER_CONFIG
     elif environment == "remote":

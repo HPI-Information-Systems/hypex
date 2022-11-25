@@ -13,7 +13,9 @@ __all__ = ["grammarviz3"]
 def post_grammarviz(scores: np.ndarray, args: dict) -> np.ndarray:
     results = pd.DataFrame(scores, columns=["index", "score", "length"])
     results = results.set_index("index")
-    anomalies = results[results["score"] > 0.0]
+    anomalies = results[
+        results["score"] > 0.0
+    ]  # pylint: disable=unsubscriptable-object
 
     # use scipy sparse matrix to save memory
     matrix = csc_matrix((len(results), 1), dtype=np.float64)
@@ -31,7 +33,7 @@ def post_grammarviz(scores: np.ndarray, args: dict) -> np.ndarray:
     scores = np.zeros_like(sums)
     np.divide(sums, counts, out=scores, where=counts != 0)
     # returns the completely flattened array (from `[[1.2], [2.3]]` to `[1.2, 2.3]`)
-    return scores.A1
+    return scores.A1  # pylint: disable=no-member
 
 
 def get_timeeval_params(

@@ -23,7 +23,7 @@ clean:
 	rm -r **/__pycache__
 
 lint:
-	${PYTHON} -m pylint ${PACKAGE_DIR}
+	${PYTHON} -m pylint ${PACKAGE_DIR} --errors-only --fail-under 9
 
 format:
 	${PYTHON} -m isort --profile black ${PACKAGE_DIR}
