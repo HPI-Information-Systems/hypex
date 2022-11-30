@@ -23,7 +23,7 @@ class Evaluator(BaseRunner):
         trial_results_full_optimization: pd.DataFrame
         trial_results_parameter_model: pd.DataFrame
         trial_results_default_parameters: pd.DataFrame
-        # trial_results_timeeval_parameters: pd.DataFrame
+        trial_results_timeeval_parameters: pd.DataFrame
         applied_mutations: t.Dict[str, t.Dict[str, str]]
 
         @classmethod
@@ -75,10 +75,10 @@ class Evaluator(BaseRunner):
                 data=self.trial_results_parameter_model,
                 path=output_dir / "trial_results_parameter_model.csv",
             )
-            # self._save_dataframe(
-            #     data=self.trial_results_timeeval_parameters,
-            #     path=output_dir / "trial_results_timeeval_parameters.csv",
-            # )
+            self._save_dataframe(
+                data=self.trial_results_timeeval_parameters,
+                path=output_dir / "trial_results_timeeval_parameters.csv",
+            )
 
     def run(
         self,
@@ -163,24 +163,24 @@ class Evaluator(BaseRunner):
                 trial_results=result_default_parameters
             )
 
-            # # Timeeval parameters
-            # result_timeeval_parameters = hypex.EvaluationModule(
-            #     seed=self.seed
-            # ).run_with_timeeval_parameters(
-            #     study=study,
-            #     timeseries_names=timeseries_names,
-            #     data_paths=result_data_generation.data_paths,
-            #     gutentag_configs=result_data_generation.gutentag_configs,
-            # )
-            # trial_results_timeeval_parameters = dask.delayed(
-            #     Evaluator._trials_to_df
-            # )(trial_results=result_timeeval_parameters)
+            # Timeeval parameters
+            result_timeeval_parameters = hypex.EvaluationModule(
+                seed=self.seed
+            ).run_with_timeeval_parameters(
+                study=study,
+                timeseries_names=timeseries_names,
+                data_paths=result_data_generation.data_paths,
+                gutentag_configs=result_data_generation.gutentag_configs,
+            )
+            trial_results_timeeval_parameters = dask.delayed(
+                Evaluator._trials_to_df
+            )(trial_results=result_timeeval_parameters)
 
             results[study.name] = Evaluator.Result(
                 trial_results_full_optimization=trial_results_full_optimization,
                 trial_results_parameter_model=trial_results_parameter_model,
                 trial_results_default_parameters=trial_results_default_parameters,
-                # trial_results_timeeval_parameters=trial_results_timeeval_parameters,
+                trial_results_timeeval_parameters=trial_results_timeeval_parameters,
                 applied_mutations=applied_mutations,
             )
         return results
