@@ -36,7 +36,7 @@ __all__ = (
     + modules.__all__
     + optuna_storage.__all__
     + registry.__all__
-    + seed.__all__
+    + seed.__all__  # pylint: disable=no-member
     + trial_result.__all__
     + utils.__all__
 )

@@ -6,7 +6,6 @@ from hypaad.utils.commands import install_dependencies, run_command, setup_remot
 
 
 def main(command: str, environment: str):
-    cluster_config: ClusterConfig = None
     if environment == "local":
         cluster_config = hypaad.LOCAL_CLUSTER_CONFIG
     elif environment == "remote":

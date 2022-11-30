@@ -23,7 +23,7 @@ def _upload_file(
 
     src = Path(temp_path).absolute()
     _logger.info("Now copying file from %s to %s on remote hosts", src, dest_path)
-    client.copy_file(src, dest_path)
+    client.copy_file(str(src), dest_path)
     client.join()
     os.remove(src)
 
@@ -93,7 +93,7 @@ def _install_dependencies(client: ParallelSSHClient):
         dest_path="hypex/requirements.txt",
         callback=_run_command_callback(
             client=client,
-            install_cmd="~/hypex/.venv/bin/python -m pip install -r ~/hypex/requirements.txt",
+            cmd="~/hypex/.venv/bin/python -m pip install -r ~/hypex/requirements.txt",
         ),
     )
 
@@ -108,8 +108,9 @@ def _install_dependencies(client: ParallelSSHClient):
         path="requirements.R",
         temp_path="requirements-tmp.R",
         dest_path="hypex/requirements.R",
-        callback=_install_callback(
-            install_cmd="RScript requirements.R",
+        callback=_run_command_callback(
+            client=client,
+            cmd="RScript requirements.R",
         ),
     )
 

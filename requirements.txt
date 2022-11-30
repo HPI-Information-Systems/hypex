@@ -422,9 +422,9 @@ terminado==0.17.0
     # via jupyter-server
 threadpoolctl==3.1.0
     # via scikit-learn
-timeeval @ git+https://github.com/HPI-Information-Systems/TimeEval.git@feat/open-dep-versions
+timeeval==1.2.8
     # via -r requirements.in
-timeeval-gutentag @ git+ssh://git@gitlab.hpi.de/akita/guten-tag.git@feat/open-dep-versions
+timeeval-gutentag==1.2.0
     # via -r requirements.in
 tinycss2==1.2.1
     # via nbconvert

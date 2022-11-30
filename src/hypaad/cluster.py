@@ -11,7 +11,6 @@ from types import TracebackType
 import asyncssh
 import dask
 import dask.distributed
-import numpy as np
 from dask import config as dask_config
 
 # pylint: disable=cyclic-import,unused-import
