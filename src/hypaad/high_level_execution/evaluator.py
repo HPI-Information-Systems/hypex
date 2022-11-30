@@ -164,7 +164,7 @@ class Evaluator(BaseRunner):
             )
 
             # Timeeval parameters
-            result_timeeval_parameters = hypex.EvaluationModule(
+            result_timeeval_parameters = hypaad.EvaluationModule(
                 seed=self.seed
             ).run_with_timeeval_parameters(
                 study=study,

@@ -1,6 +1,6 @@
 VENV_NAME?=.venv
 PYTHON=${VENV_NAME}/bin/python3
-PACKAGE_DIR=src/hypex
+PACKAGE_DIR=src/hypaad
 TEST_DIR=tests
 
 .PHONY: release deps install-dev install-ci install test format lint clean setupCI setup create-env run-remote
